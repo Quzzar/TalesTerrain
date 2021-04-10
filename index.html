@@ -26,8 +26,21 @@
 
     <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js'></script>
     <script type="module" src="js/height-map.js"></script>
-    <script type="module" src="js/shadow-map.js"></script>
-    <script type="module" src='js/index.js'></script>
+    <script type="module" src="js/river.js"></script>
+    <!--<script type="module" src="js/shadow-map.js"></script>-->
+
+    <script src='js/map-gen/utils.js'></script>
+    <script type="module" src='js/map-gen/main.js'></script>
+
+
+    
+    <div id="legend"></div>
+    <script>
+      for(let biome of getBiomeList()){
+        let color = getBiomeColor(biome);
+        $('#legend').append(`<p style="color: rgb(${color.r},${color.g},${color.b});">${biome}</p>`);
+      }
+    </script>
 
   </body>
 </html>

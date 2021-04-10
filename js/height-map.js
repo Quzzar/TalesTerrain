@@ -9,7 +9,7 @@ export default class HeightMap {
         this.startDisplacement();
     }
 
-    get mapData() {
+    get heightMapData() {
         return this.map;
     }
 

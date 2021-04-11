@@ -1,6 +1,7 @@
 
-body {
+html {
   font-family: 'Baloo 2', cursive;
+  overflow: auto;
 }
 
 #size-panel {

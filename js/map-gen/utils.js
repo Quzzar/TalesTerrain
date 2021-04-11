@@ -57,22 +57,6 @@ function fade(startColor, endColor, steps, step){
   }
 };
 
-function setColor(imgData, colorFill, x, y, unitSize, canvasId){
-  var canvas = document.getElementById(canvasId);
-
-  for (var w = 0; w <= unitSize; w++) {
-    for (var h = 0; h <= unitSize; h++) {
-      var pData = ( ~~(x + w) + ( ~~(y + h) * canvas.width)) * 4;
-
-      imgData[pData] = colorFill.r;
-      imgData[pData + 1] = colorFill.g;
-      imgData[pData + 2] = colorFill.b;
-      imgData[pData + 3] = 255;
-    }
-  }
-
-}
-
 
 function generateNearbyOcean(mapData, settings){
   let size = settings.mapDimension;

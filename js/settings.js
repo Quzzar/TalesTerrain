@@ -1,6 +1,7 @@
 
 function initSettings(settings) {
 
+  // Ocean Height //
   $('#setting-oceanHeight').val(settings.oceanHeight);
   $('#settingOutput-oceanHeight').text(settings.oceanHeight);
   $('#setting-oceanHeight').on('input',() => {
@@ -9,6 +10,7 @@ function initSettings(settings) {
     settings.oceanHeight = val;
   });
 
+  // Mountain Height //
   $('#setting-mountainHeight').val(settings.mountainHeight);
   $('#settingOutput-mountainHeight').text(settings.mountainHeight);
   $('#setting-mountainHeight').on('input',() => {
@@ -17,27 +19,36 @@ function initSettings(settings) {
     settings.mountainHeight = val;
   });
 
-  $('#setting-unitSize').val(settings.unitSize);
+  // Unit Size //
+  $('#setting-unitSize').val(Math.log2(settings.unitSize));
   $('#settingOutput-unitSize').text(settings.unitSize);
   $('#setting-unitSize').on('input',() => {
     let val = parseInt($('#setting-unitSize').val());
+    val = Math.pow(2, val);
     $('#settingOutput-unitSize').text(val);
     settings.unitSize = val;
   });
 
+  // Map Size //
+  $('#setting-mapDimension').val(Math.log2(settings.mapDimension));
+  $('#settingOutput-mapDimension').text(settings.mapDimension);
+  $('#setting-mapDimension').on('input',() => {
+    let val = parseInt($('#setting-mapDimension').val());
+    val = Math.pow(2, val);
+    $('#settingOutput-mapDimension').text(val);
+    settings.mapDimension = val;
+  });
 
-  /*
-  const x = document.getElementById('input');
-  const y = document.getElementById('output');
+  // Wind Direction //
+  $('#setting-windsDirection').val(settings.windsDirection);
+  $('#setting-windsDirection').on('change',() => {
+    settings.windsDirection = $('#setting-windsDirection').val();
+  });
 
-  const a = 100;
-  const b = Math.pow(a, 1/a);
-
-  function updateOutput(event) {
-    y.innerText = Math.floor(a * Math.pow(b, x.value));
-  }
-  updateOutput();
-  input.addEventListener('mousemove', updateOutput);
-  */
+  // Display Type //
+  $('#setting-displayType').val(settings.displayType);
+  $('#setting-displayType').on('change',() => {
+    settings.displayType = $('#setting-displayType').val();
+  });
 
 }

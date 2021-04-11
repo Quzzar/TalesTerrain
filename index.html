@@ -94,7 +94,21 @@
         </p>
       </div>
       <div id="settings-panel-contents" class="is-hidden is-size-7">
-        <hr class="m-1">
+        <hr class="my-1">
+        <div class="setting-container">
+          <span class="is-bold">Map Size</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-mapDimension"></div>
+            <input id="setting-mapDimension" class="ml-2" type="range" min="4" max="13" value="" step="1"/>
+          </div>
+        </div>
+        <div class="setting-container">
+          <span class="is-bold">Unit Size</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-unitSize"></div>
+            <input id="setting-unitSize" class="ml-2" type="range" min="0" max="4" value="" step="1"/>
+          </div>
+        </div>
         <div class="setting-container">
           <span class="is-bold">Ocean Height</span>
           <div class="is-flex is-pulled-right">
@@ -109,11 +123,32 @@
             <input id="setting-mountainHeight" class="ml-2" type="range" min="0" max="1" value="" step="0.1"/>
           </div>
         </div>
-        <div class="setting-container">
-          <span class="is-bold">Unit Size</span>
+        <hr class="is-light my-1 mx-2">
+        <div class="setting-container is-select">
+          <span class="is-bold">Wind Direction</span>
           <div class="is-flex is-pulled-right">
-            <div id="settingOutput-unitSize"></div>
-            <input id="setting-unitSize" class="ml-2" type="range" min="1" max="16" value="" step="1"/>
+            <div class="select is-small is-info">
+              <select id="setting-windsDirection">
+                <option value="WEST-TO-EAST">West-to-East</option>
+                <option value="EAST-TO-WEST">East-to-West</option>
+                <option value="NORTH-TO-SOUTH">North-to-South</option>
+                <option value="SOUTH-TO-NORTH">South-to-North</option>
+                <option value="NONE">None</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <hr class="is-light my-1 mx-2">
+        <div class="setting-container is-select">
+          <span class="is-bold">Display Type</span>
+          <div class="is-flex is-pulled-right">
+            <div class="select is-small is-info">
+              <select id="setting-displayType">
+                <option value="STANDARD">2D-Standard</option>
+                <option value="SHADOWS">2D-Shadows</option>
+                <option value="3D">3D</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

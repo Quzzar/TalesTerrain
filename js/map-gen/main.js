@@ -68,9 +68,9 @@ let mapCanvas = document.getElementById('canvas');
 let imgSave = document.getElementById('imgSave');
 let settings = {
     mapDimension : 512,
-    unitSize : 1,
+    unitSize : 2,
     mapType : 3,
-    genShadows : true,
+    displayType : 'SHADOWS', // STANDARD, SHADOWS, 3D
 
     roughness : 5,
     smoothness : 0.6,
@@ -83,7 +83,7 @@ let settings = {
     oceanMoistureModifier: 0.4,
     oceanMoistureSpread: 0.01, // Smaller = larger spread
 
-    windsDirection: 'WEST-TO-EAST', // WEST-TO-EAST, EAST-TO-WEST, NORTH-TO-SOUTH, SOUTH-TO-NORTH, NONE
+    windsDirection: 'NONE', // WEST-TO-EAST, EAST-TO-WEST, NORTH-TO-SOUTH, SOUTH-TO-NORTH, NONE
     mountainHeight: 0.8,
     mountainMoistureSpread: 0.05, // Smaller = larger spread
     mountainAffectOnMoisture: 0.3,
@@ -109,38 +109,14 @@ let heightMapData;
 
 function terrainGeneration(){
   "use strict";
-  // Set these variables to adjust how the map is generated
-  var mapDimension,
-      unitSize = 0,
-      roughness = 0,
-      genShadows = 0,
-      sunX = settings.sunX,
-      sunY = settings.sunY,
-      sunZ = settings.sunZ,
-      mapType = 0,
-      mapCanvas = document.getElementById('canvas'),
-      mapCtx = mapCanvas.getContext("2d");
-
-  // init
-  roughness = parseInt(settings.roughness, 10);
-  mapDimension = parseInt(settings.mapDimension, 10);
-  unitSize = parseInt(settings.unitSize, 10);
-  mapType = parseInt(settings.mapType, 10);
-
-  genShadows = settings.genShadows;
-
-  if (genShadows) {
-      sunX = parseInt(settings.sunX, 10);
-      sunY = parseInt(settings.sunY, 10);
-      sunZ = parseInt(settings.sunZ, 10);
-  }
 
   //setLoadPercentage(10, 'Generating heightmap...');
   startTime = new Date().getTime();
 
-  mapCanvas.width = mapDimension;
-  mapCanvas.height = mapDimension;
-  heightMapData = new HeightMap(mapDimension, unitSize, roughness).heightMapData;
+  let mapCanvas = document.getElementById('canvas');
+  mapCanvas.width = settings.mapDimension;
+  mapCanvas.height = settings.mapDimension;
+  heightMapData = new HeightMap(settings.mapDimension, settings.unitSize, settings.roughness).heightMapData;
 
   endTime = new Date().getTime();
   console.log(`Creating heightmap took: ${endTime-startTime}`);
@@ -149,8 +125,8 @@ function terrainGeneration(){
   startTime = new Date().getTime();
 
   // Smooth terrain
-  for(var i = 0; i < settings.smoothIterations; i++){
-    heightMapData = smooth(heightMapData, mapDimension, settings.smoothness);
+  for(let i = 0; i < settings.smoothIterations; i++){
+    heightMapData = smooth(heightMapData, settings.mapDimension, settings.smoothness);
   }
 
   endTime = new Date().getTime();
@@ -161,7 +137,7 @@ function terrainGeneration(){
   startTime = new Date().getTime();
 
   // Fill mapData with nothing
-  mapData = Array(mapDimension + 1).fill({}).map(el => new Array(mapDimension + 1).fill({}).map(el => {}));
+  mapData = Array(settings.mapDimension + 1).fill({}).map(el => new Array(settings.mapDimension + 1).fill({}).map(el => {}));
   for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
     for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
 
@@ -220,27 +196,38 @@ function terrainGeneration(){
   endTime = new Date().getTime();
   console.log(`Moisture Map took: ${endTime-startTime}`);
 
-  //setLoadPercentage(70, 'Drawing map...');
-
+  //setLoadPercentage(70, 'Coloring map...');
   startTime = new Date().getTime();
 
-  // Draw everything after the terrain vals are generated
-  drawMap(unitSize, mapDimension, "canvas", mapType);
+  colorMap();
+
+  endTime = new Date().getTime();
+  console.log(`Coloring map took: ${endTime-startTime}`);
+
+  //setLoadPercentage(90, 'Drawing map...');
+  startTime = new Date().getTime();
+
+  if(settings.displayType == 'STANDARD'){
+
+    let mapCtx = mapCanvas.getContext("2d");
+
+    drawMap(mapCtx);
+
+  } else if(settings.displayType == 'SHADOWS'){
+
+    let mapCtx = mapCanvas.getContext("2d");
+
+    drawMap(mapCtx);
+    drawShadowMap(mapCtx);
+
+  }
 
   endTime = new Date().getTime();
   console.log(`Drawing map took: ${endTime-startTime}`);
 
-  startTime = new Date().getTime();
-
-  if(genShadows){
-    //setLoadPercentage(90, 'Drawing shadows...');
-    drawShadowMap(mapCtx, unitSize, mapDimension, sunX, sunY, sunZ);
-  }
-
-  endTime = new Date().getTime();
-  console.log(`Drawing shadows took: ${endTime-startTime}`);
-
   //setLoadPercentage(100, 'Finalizing...');
+
+  console.log(mapData);
 
   // Reveal canvas and legend / hide spinner
   $('#loading-spinner-container').addClass('is-hidden');
@@ -279,138 +266,164 @@ function temperatureMap() {
       }
     }
 
- }
+}
 
-// Draw the map
-function drawMap(unitSize, mapDimension, canvasId, mapType){
-  var canvas = document.getElementById(canvasId),
-  ctx = canvas.getContext("2d"),
-  x = 0,
-  y = 0,
-  r = 0, g = 0, b = 0, gamma = 500,
-  colorFill = 0,
-  img = ctx.createImageData(canvas.height, canvas.width),
-  imgData = img.data;
+function generateRivers(){
 
-
-  // colormap colors
-  var waterStart={r:10,g:20,b:40},
-    waterEnd={r:39,g:50,b:63},
-    grassStart={r:22,g:38,b:3},
-    grassEnd={r:67,g:100,b:18},
-    mtnEnd={r:60,g:56,b:31},
-    mtnStart={r:67,g:80,b:18},
-    rocamtStart={r:90,g:90,b:90},
-    rocamtEnd={r:130,g:130,b:130},
-    snowStart={r:255,g:255,b:255},
-    snowEnd={r:200,g:200,b:200};
-
-  
   let rivers = [];
 
-  for(x = 0; x < mapDimension; x += unitSize){
-    for(y = 0; y < mapDimension; y += unitSize){
-        colorFill = {r : 0, g : 0, b : 0};
-        var height = heightMapData[x][y];
+  for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
+    for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
+      let height = heightMapData[x][y];
 
-
-        // Potential river start
-        if(height >= settings.riverStartHeight){
-          let chanceOfRiver = settings.riverStartChance; 
-          if(chanceOfRiver > Math.random()){
-            rivers.push({x, y});
-          }
+      // Potential river start
+      if(height >= settings.riverStartHeight){
+        let chanceOfRiver = settings.riverStartChance; 
+        if(chanceOfRiver > Math.random()){
+          rivers.push({x, y});
         }
+      }
 
-        switch(mapType){
-          case 1: // Color map
-              if (height >= 0 && height <= settings.oceanHeight) {
-                  colorFill = fade(waterStart, waterEnd, 30, parseInt(height * 100, 10));
-              } else if (height > 0.3 && height <= 0.7) {
-                  colorFill = fade(grassStart, grassEnd, 45, parseInt(height * 100, 10) - 30);
-              } else if (height > 0.7 && height <= 0.95) {
-                  colorFill = fade(mtnStart, mtnEnd, 15, parseInt(height * 100, 10) - 70);
-              } else if (height > 0.95 && height <= 1) {
-                  colorFill = fade(rocamtStart, rocamtEnd, 5, parseInt(height * 100, 10) - 95);
-              }
-              break;
-          case 2: // Standard
-              var standardShade = Math.floor(height * 250);
-              colorFill = {r : standardShade, g : standardShade, b : standardShade};
-              break;
-          case 3: // Biome
-              let biome = getBiome(mapData, {x, y});
-              colorFill = getBiomeColor(biome);
-              if (height >= 0 && height <= settings.oceanHeight) {
-                colorFill = fade(waterStart, waterEnd, 30, parseInt(height * 100, 10));
-              }
-              break;
-          case 4: // Near Ocean
-              let nearOcean = mapData[x][y].nearOcean;
-              var shade = Math.floor(nearOcean * 250);
-              colorFill = {r : shade, g : shade, b : shade};
-              break;
-          case 5: // Near Mountain
-              let nearMountain = mapData[x][y].nearMountain;
-              var shade = Math.floor(nearMountain * 250);
-              colorFill = {r : shade, g : shade, b : shade};
-              break;
-          case 6: // Mountain Moisture
-              let mountainMoisture = mapData[x][y].mountainMoisture+0.5;
-              var shade = Math.floor(mountainMoisture * 250);
-              colorFill = {r : shade, g : shade, b : shade};
-              break;
-          case 7: // Near Mountain + Mountain Moisture
-              let comb = (mapData[x][y].nearMountain+mapData[x][y].mountainMoisture+0.5)/2;
-              var shade = Math.floor(comb * 250);
-              colorFill = {r : shade, g : shade, b : shade};
-              break;
-          case 10:
-              // Section of code modified from http://www.hyper-metrix.com/processing-js/docs/index.php?page=Plasma%20Fractals
-              if (height < 0.5) {
-                  r = height * gamma;
-              } else {
-                  r = (1.0 - height) * gamma;
-              }
-
-              if (height >= 0.3 && height < 0.8) {
-                  g = (height - 0.3) * gamma;
-              } else if (height < 0.3) {
-                  g = (0.3 - height) * gamma;
-              } else {
-                  g = (1.3 - height) * gamma;
-              }
-
-              if (height >= 0.5) {
-                  b = (height - 0.5) * gamma;
-              } else {
-                  b = (0.5 - height) * gamma;
-              }
-              colorFill = { r :  ~~r, g : ~~g, b : ~~b};
-              break;
-          default:
-              break;
-        }
-
-        setColor(imgData, colorFill, x, y, unitSize, canvasId);
-
-        
     }
   }
 
-  console.log(mapData);
-
-  /*
-  // Rivers
+  // OLD-Needs UPDATING
   console.log('Rivers Generated: '+rivers.length);
   for(let riverPoint of rivers){
     let river = new River(heightMapData, unitSize, riverPoint);
     river.setColor(imgData, { r: 33, g: 80, b: 122 }, unitSize, canvasId);
   }
-  */
+
+}
+
+function colorMap(){
+
+  var x = 0,
+      y = 0,
+      r = 0, g = 0, b = 0, gamma = 500,
+      colorFill = 0;
+
+  // colormap colors
+  var waterStart={r:10,g:20,b:40},
+      waterEnd={r:39,g:50,b:63},
+      grassStart={r:22,g:38,b:3},
+      grassEnd={r:67,g:100,b:18},
+      mtnEnd={r:60,g:56,b:31},
+      mtnStart={r:67,g:80,b:18},
+      rocamtStart={r:90,g:90,b:90},
+      rocamtEnd={r:130,g:130,b:130},
+      snowStart={r:255,g:255,b:255},
+      snowEnd={r:200,g:200,b:200};
 
 
-  ctx.putImageData(img, 0, 0);
+  for(x = 0; x < settings.mapDimension; x += settings.unitSize){
+    for(y = 0; y < settings.mapDimension; y += settings.unitSize){
+      let height = heightMapData[x][y];
+      colorFill = {r : 0, g : 0, b : 0};
+
+      switch(settings.mapType){
+        case 1: // Color map
+          if (height >= 0 && height <= settings.oceanHeight) {
+            colorFill = fade(waterStart, waterEnd, 30, parseInt(height * 100, 10));
+          } else if (height > 0.3 && height <= 0.7) {
+            colorFill = fade(grassStart, grassEnd, 45, parseInt(height * 100, 10) - 30);
+          } else if (height > 0.7 && height <= 0.95) {
+            colorFill = fade(mtnStart, mtnEnd, 15, parseInt(height * 100, 10) - 70);
+          } else if (height > 0.95 && height <= 1) {
+            colorFill = fade(rocamtStart, rocamtEnd, 5, parseInt(height * 100, 10) - 95);
+          }
+          break;
+        case 2: // Standard
+          var standardShade = Math.floor(height * 250);
+          colorFill = {r : standardShade, g : standardShade, b : standardShade};
+          break;
+        case 3: // Biome
+          let biome = getBiome(mapData, {x, y});
+          colorFill = getBiomeColor(biome);
+          if (height >= 0 && height <= settings.oceanHeight) {
+            colorFill = fade(waterStart, waterEnd, 30, parseInt(height * 100, 10));
+          }
+          break;
+        case 4: // Near Ocean
+          let nearOcean = mapData[x][y].nearOcean;
+          var shade = Math.floor(nearOcean * 250);
+          colorFill = {r : shade, g : shade, b : shade};
+          break;
+        case 5: // Near Mountain
+          let nearMountain = mapData[x][y].nearMountain;
+          var shade = Math.floor(nearMountain * 250);
+          colorFill = {r : shade, g : shade, b : shade};
+          break;
+        case 6: // Mountain Moisture
+          let mountainMoisture = mapData[x][y].mountainMoisture+0.5;
+          var shade = Math.floor(mountainMoisture * 250);
+          colorFill = {r : shade, g : shade, b : shade};
+          break;
+        case 7: // Near Mountain + Mountain Moisture
+          let comb = (mapData[x][y].nearMountain+mapData[x][y].mountainMoisture+0.5)/2;
+          var shade = Math.floor(comb * 250);
+          colorFill = {r : shade, g : shade, b : shade};
+          break;
+        case 10:
+          // Section of code modified from http://www.hyper-metrix.com/processing-js/docs/index.php?page=Plasma%20Fractals
+          if (height < 0.5) {
+            r = height * gamma;
+          } else {
+            r = (1.0 - height) * gamma;
+          }
+
+          if (height >= 0.3 && height < 0.8) {
+            g = (height - 0.3) * gamma;
+          } else if (height < 0.3) {
+            g = (0.3 - height) * gamma;
+          } else {
+            g = (1.3 - height) * gamma;
+          }
+
+          if (height >= 0.5) {
+            b = (height - 0.5) * gamma;
+          } else {
+            b = (0.5 - height) * gamma;
+          }
+          colorFill = { r :  ~~r, g : ~~g, b : ~~b};
+          break;
+        default:
+          break;
+      }
+
+      mapData[x][y].colorFill = colorFill;
+
+    }
+  }
+
+}
+
+// Draw the map
+function drawMap(mapCtx){
+  let img = mapCtx.createImageData(canvas.height, canvas.width);
+  let imgData = img.data;
+
+  // For each unit,
+  for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
+    for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
+      let colorFill = mapData[x][y].colorFill;
+
+      // For each pixel,
+      for (var w = 0; w <= settings.unitSize; w++) {
+        for (var h = 0; h <= settings.unitSize; h++) {
+          var pData = ( ~~(x + w) + ( ~~(y + h) * canvas.width)) * 4;
+    
+          imgData[pData] = colorFill.r;
+          imgData[pData + 1] = colorFill.g;
+          imgData[pData + 2] = colorFill.b;
+          imgData[pData + 3] = 255;
+        }
+      }
+
+    }
+  }
+
+  mapCtx.putImageData(img, 0, 0);
 
   // Add to an image so its easier to save
   var strDataURI = mapCanvas.toDataURL();
@@ -420,20 +433,25 @@ function drawMap(unitSize, mapDimension, canvasId, mapType){
 
 
 //Create Shadowmap
-function drawShadowMap(mapCtx, unitSize, mapDimension, sunPosX, sunPosY, sunHeight){
+function drawShadowMap(mapCtx){
   var shadowCanvas = document.createElement("canvas"),
     sCtx = shadowCanvas.getContext("2d"),
     x = 0, y = 0,
     idx,
-    colorFill = {r : 0, g : 0, b : 0, a : 0},
+    colorFill = {r: 0, g: 0, b: 0, a: 0},
     sunX, sunY, sunZ,
     pX, pY, pZ,
-    mag, dX, dY, dZ;
+    mag, dX, dY, dZ,
+    unitSize = settings.unitSize,
+    mapDimension = settings.mapDimension,
+    sunPosX = settings.sunX,
+    sunPosY = settings.sunY,
+    sunHeight = settings.sunZ;
 
   shadowCanvas.width = shadowCanvas.height = mapDimension;
 
-  var img = sCtx.createImageData(shadowCanvas.width, shadowCanvas.height),
-    imgData = img.data;
+  let img = sCtx.createImageData(shadowCanvas.width, shadowCanvas.height);
+  let imgData = img.data;
 
   // Suns position
   sunX = sunPosX;

@@ -9,10 +9,18 @@ hr {
   height: 1px;
 }
 
+hr.is-light {
+  background-color: #cecece;
+}
+
 #settings-panel {
 
 
 
+}
+
+.setting-container.is-select {
+  padding-bottom: 0.8rem;
 }
 
 #loading-spinner-container {
@@ -28,7 +36,7 @@ hr {
 
 .panel {
 
-  background-color: rgb(235, 235, 235);
+  background-color: rgb(247 247 247);
   border-radius: 15px;
   width: 30vw;
   min-width: 200px;

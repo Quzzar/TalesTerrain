@@ -33,7 +33,9 @@ window.onload = () => {
 
 
   // Generate map
-  settings.render();
+  setTimeout(() => {
+    settings.render();
+  },0);
 }
 
 

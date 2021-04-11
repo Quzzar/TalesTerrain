@@ -23,7 +23,6 @@
     <link rel="stylesheet" href="css/background.css" type="text/css"/>
 
 
-    <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js'></script>
     <script type="module" src="js/height-map.js"></script>
     <script type="module" src="js/river.js"></script>
     <!--<script type="module" src="js/shadow-map.js"></script>-->
@@ -31,6 +30,7 @@
     <script src='js/general-utils.js'></script>
     <!--<script src='js/map-gen/loading-gen.js'></script>-->
     <script src='js/map-gen/utils.js'></script>
+    <script src='js/settings.js'></script>
     <script async type="module" src='js/map-gen/main.js'></script>
 
   </head>
@@ -48,12 +48,25 @@
       <img id="imgSave"></img>
       <!-- <canvas id="voxelview" width="10" height="10"></canvas> -->
     </div>
+    <div id="loading-spinner-container">
+      <span class="icon has-text-link">
+        <i class="fas fa-3x fa-sync-alt"></i>
+      </span>
+    </div>
     <!--
       <div id="loading-canvas-container">
         <progress id="loading-canvas" class="progress is-success is-marginless" value="0" max="100">0%</progress>
         <p id="loading-message" class="is-size-7 has-text-centered">Initializing generation...</p>
       </div>
     -->
+
+    <div id="canvas-legend" class="ml-5 panel is-hidden py-2">
+      <div class="columns">
+        <div id="legend-column-1" class="column"></div>
+        <div id="legend-column-2" class="column"></div>
+      </div>
+    </div>
+
 
     <!-- Right Side -->
     <div class="pos-absolute pos-t-15 pos-r-10 is-inline-flex">
@@ -73,19 +86,39 @@
         <span class="button is-info is-rounded is-small">Complete</span>
       </div>
     </div>
-    <div id="size-panel" class="pos-absolute pos-t-20 pos-r-10">
-      
-      
-
-    </div>
-
-    
-    <div id="canvas-legend" class="ml-5 panel is-hidden">
-      <div class="columns">
-        <div id="legend-column-1" class="column"></div>
-        <div id="legend-column-2" class="column"></div>
+    <div id="settings-panel" class="panel pos-absolute pos-t-55 pos-r-10">
+      <div id="settings-panel-top-bar" class="is-clickable is-unselectable">
+        <p class="has-text-centered is-size-6">
+          Settings
+          <span class="icon is-pulled-right"><i id="settings-panel-chevron" class="fas fa-chevron-down"></i></span>
+        </p>
+      </div>
+      <div id="settings-panel-contents" class="is-hidden is-size-7">
+        <hr class="m-1">
+        <div class="setting-container">
+          <span class="is-bold">Ocean Height</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-oceanHeight"></div>
+            <input id="setting-oceanHeight" class="ml-2" type="range" min="0" max="1" value="" step="0.1"/>
+          </div>
+        </div>
+        <div class="setting-container">
+          <span class="is-bold">Mountain Height</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-mountainHeight"></div>
+            <input id="setting-mountainHeight" class="ml-2" type="range" min="0" max="1" value="" step="0.1"/>
+          </div>
+        </div>
+        <div class="setting-container">
+          <span class="is-bold">Unit Size</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-unitSize"></div>
+            <input id="setting-unitSize" class="ml-2" type="range" min="1" max="16" value="" step="1"/>
+          </div>
+        </div>
       </div>
     </div>
+
 
   </body>
 </html>

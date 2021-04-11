@@ -4,10 +4,20 @@ html {
   overflow: auto;
 }
 
-#size-panel {
+hr {
+  background-color: #9c9c9c;
+  height: 1px;
+}
+
+#settings-panel {
 
 
 
+}
+
+#loading-spinner-container {
+  padding-left: 20vw;
+  padding-top: 20vh;
 }
 
 #loading-canvas-container {
@@ -22,8 +32,8 @@ html {
   border-radius: 15px;
   width: 30vw;
   min-width: 200px;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
   padding-left: 1rem;
   padding-right: 1rem;
 

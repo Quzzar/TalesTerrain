@@ -3,9 +3,33 @@ import River from '../river.js';
 
 window.onload = () => {
 
+  // Regenerate Map Button
   $('#regenerate-map-btn').on("click", function(){
-    settings.render();
+    $('#canvas-container').addClass('is-hidden');
+    $('#canvas-legend').addClass('is-hidden');
+    $('#loading-spinner-container').removeClass('is-hidden');
+    setTimeout(() => {
+      settings.render();
+    },0);
   });
+
+  // Settings Panel (open/close)
+  $('#settings-panel-top-bar').on("click", function(){
+    if($('#settings-panel-contents').hasClass('is-hidden')){
+      // Is Closed
+      $('#settings-panel-chevron').removeClass('fa-chevron-down');
+      $('#settings-panel-chevron').addClass('fa-chevron-up');
+      $('#settings-panel-contents').removeClass('is-hidden');
+    } else {
+      // Is Open
+      $('#settings-panel-chevron').removeClass('fa-chevron-up');
+      $('#settings-panel-chevron').addClass('fa-chevron-down');
+      $('#settings-panel-contents').addClass('is-hidden');
+    }
+  });
+
+  // Handle Settings
+  initSettings(settings);
 
   // Fill biomes legend
   let biomes = getBiomeList();
@@ -218,7 +242,8 @@ function terrainGeneration(){
 
   //setLoadPercentage(100, 'Finalizing...');
 
-  // Reveal canvas and legend,
+  // Reveal canvas and legend / hide spinner
+  $('#loading-spinner-container').addClass('is-hidden');
   $('#canvas-container').removeClass('is-hidden');
   $('#canvas-legend').removeClass('is-hidden');
   setTimeout(() => {

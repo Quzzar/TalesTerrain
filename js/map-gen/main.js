@@ -220,7 +220,7 @@ function terrainGeneration(){
   $('#canvas-container').removeClass('is-hidden');
   $('#canvas-legend').removeClass('is-hidden');
   setTimeout(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo(0,0);
   },0);
 
 }

@@ -12,35 +12,78 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.2/css/bulma.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.12.1/js/all.js"></script>
+
+    <link rel="stylesheet" href="css/bulma-extension.css" type="text/css"/>
 
     <link rel="stylesheet" href="css/main.css" type="text/css"/>
     <link rel="stylesheet" href="css/terrain.css" type="text/css"/>
+    <link rel="stylesheet" href="css/background.css" type="text/css"/>
 
-  </head>
-  <body>
-
-    
-    <canvas id="canvas" width="10" height="10"></canvas>
-    <img id="imgSave"></img>
-    <canvas id="voxelview" width="10" height="10"></canvas>
 
     <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js'></script>
     <script type="module" src="js/height-map.js"></script>
     <script type="module" src="js/river.js"></script>
     <!--<script type="module" src="js/shadow-map.js"></script>-->
 
+    <script src='js/general-utils.js'></script>
+    <!--<script src='js/map-gen/loading-gen.js'></script>-->
     <script src='js/map-gen/utils.js'></script>
-    <script type="module" src='js/map-gen/main.js'></script>
+    <script async type="module" src='js/map-gen/main.js'></script>
 
+  </head>
+  <body class="pos-relative">
+
+    <!-- Left Side -->
+    <div class="pos-absolute pos-t-10 pos-l-10 is-inline-flex">
+      <figure class="image is-24x24">
+        <img src="/fav.ico">
+      </figure>
+      <span class="pl-1">TalesTerrain</span>
+    </div>
+    <div id="canvas-container" class="pl-5 pt-6 is-hidden">
+      <canvas id="canvas" width="10" height="10"></canvas>
+      <img id="imgSave"></img>
+      <!-- <canvas id="voxelview" width="10" height="10"></canvas> -->
+    </div>
+    <!--
+      <div id="loading-canvas-container">
+        <progress id="loading-canvas" class="progress is-success is-marginless" value="0" max="100">0%</progress>
+        <p id="loading-message" class="is-size-7 has-text-centered">Initializing generation...</p>
+      </div>
+    -->
+
+    <!-- Right Side -->
+    <div class="pos-absolute pos-t-15 pos-r-10 is-inline-flex">
+      <div class="buttons">
+        <span class="button is-success is-rounded is-very-small is-outlined">
+          <span>Upload Heightmap</span>
+          <span class="icon">
+            <i class="fas fa-file-upload"></i>
+          </span>
+        </span>
+        <span id="regenerate-map-btn" class="button is-link is-rounded is-very-small is-outlined">
+          <span>Regenerate</span>
+          <span class="icon">
+            <i class="fas fa-sync-alt"></i>
+          </span>
+        </span>
+        <span class="button is-info is-rounded is-small">Complete</span>
+      </div>
+    </div>
+    <div id="size-panel" class="pos-absolute pos-t-20 pos-r-10">
+      
+      
+
+    </div>
 
     
-    <div id="legend"></div>
-    <script>
-      for(let biome of getBiomeList()){
-        let color = getBiomeColor(biome);
-        $('#legend').append(`<p style="color: rgb(${color.r},${color.g},${color.b});">${biome}</p>`);
-      }
-    </script>
+    <div id="canvas-legend" class="ml-5 panel is-hidden">
+      <div class="columns">
+        <div id="legend-column-1" class="column"></div>
+        <div id="legend-column-2" class="column"></div>
+      </div>
+    </div>
 
   </body>
 </html>

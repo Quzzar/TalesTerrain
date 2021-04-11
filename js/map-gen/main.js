@@ -1,29 +1,82 @@
 import HeightMap from '../height-map.js';
 import River from '../river.js';
 
-window.onload = terrainGeneration;
+window.onload = () => {
+
+  $('#regenerate-map-btn').on("click", function(){
+    settings.render();
+  });
+
+  // Fill biomes legend
+  let biomes = getBiomeList();
+  let columnSize = Math.floor(biomes.length/2);
+  for (let i = 0; i < biomes.length; i++) {
+    let columnID;
+    if(i <= columnSize){
+      columnID = 'legend-column-1';
+    } else {
+      columnID = 'legend-column-2';
+    }
+    const biome = biomes[i];
+    let color = getBiomeColor(biome);
+    $('#'+columnID).append(`
+      <p class="is-size-7">
+        <span style="color: rgb(${color.r},${color.g},${color.b});">
+          <i class="fas fa-square"></i>
+        </span>
+        <span>
+          ${capitalizeWords(biome)}
+        </span>
+      </p>
+    `);
+  }
+
+
+  // Generate map
+  settings.render();
+}
+
+
 
 let mapCanvas = document.getElementById('canvas');
 let imgSave = document.getElementById('imgSave');
 let settings = {
-    roughness : 5,
     mapDimension : 512,
     unitSize : 1,
     mapType : 3,
+    genShadows : true,
+
+    roughness : 5,
     smoothness : 0.6,
     smoothIterations : 1,
-    genShadows : true,
-    riverStartChance : 0.01,
+
+    riverStartChance : 0.005,
     riverStartHeight : 0.85,
+
     oceanHeight: 0.3,
-    oceanSearchLength: 20, // 25
+    oceanMoistureModifier: 0.4,
+    oceanMoistureSpread: 0.01, // Smaller = larger spread
+
+    windsDirection: 'WEST-TO-EAST', // WEST-TO-EAST, EAST-TO-WEST, NORTH-TO-SOUTH, SOUTH-TO-NORTH, NONE
+    mountainHeight: 0.8,
+    mountainMoistureSpread: 0.05, // Smaller = larger spread
+    mountainAffectOnMoisture: 0.3,
+    moistureNearMountainMin: 0.002, // Difference in neighbor mountain height, used to determine if nearby a mountain
+    moistureNearMountainMax: 0.019,
+
+    moistureGlobal: 0.2,
+    temperatureGlobal: 0.0,
+
     sunX : -100,
     sunY : -100,
     sunZ : 4,
     render : function(){
-        terrainGeneration();
+      terrainGeneration();
     }
 };
+
+let startTime;
+let endTime;
 
 let mapData;
 let heightMapData;
@@ -56,27 +109,150 @@ function terrainGeneration(){
       sunZ = parseInt(settings.sunZ, 10);
   }
 
+  //setLoadPercentage(10, 'Generating heightmap...');
+  startTime = new Date().getTime();
+
   mapCanvas.width = mapDimension;
   mapCanvas.height = mapDimension;
   heightMapData = new HeightMap(mapDimension, unitSize, roughness).heightMapData;
+
+  endTime = new Date().getTime();
+  console.log(`Creating heightmap took: ${endTime-startTime}`);
+
+  //setLoadPercentage(15, 'Smoothing terrain...');
+  startTime = new Date().getTime();
 
   // Smooth terrain
   for(var i = 0; i < settings.smoothIterations; i++){
     heightMapData = smooth(heightMapData, mapDimension, settings.smoothness);
   }
 
+  endTime = new Date().getTime();
+  console.log(`Smoothing map took: ${endTime-startTime}`);
+
+  //setLoadPercentage(20, 'Populating data map...');
+
+  startTime = new Date().getTime();
+
   // Fill mapData with nothing
   mapData = Array(mapDimension + 1).fill({}).map(el => new Array(mapDimension + 1).fill({}).map(el => {}));
+  for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
+    for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
+
+      // Set mapData
+      mapData[x][y] = {};
+      mapData[x][y].height = heightMapData[x][y];
+
+    }
+  }
+
+  endTime = new Date().getTime();
+  console.log(`Init mapData took: ${endTime-startTime}`);
+
+  //setLoadPercentage(30, 'Creating oceans...');
+
+  startTime = new Date().getTime();
+
+  generateNearbyOcean(mapData, settings);
+
+  endTime = new Date().getTime();
+  console.log(`Nearby Ocean took: ${endTime-startTime}`);
+
+  //setLoadPercentage(35, 'Creating mountains...');
+
+  startTime = new Date().getTime();
+
+  generateNearbyMountain(mapData, settings);
+
+  endTime = new Date().getTime();
+  console.log(`Nearby Mountain took: ${endTime-startTime}`);
+
+  //setLoadPercentage(40, 'Calculating climates...');
+
+  startTime = new Date().getTime();
+
+  generateMountainMoisture(mapData, settings);
+
+  endTime = new Date().getTime();
+  console.log(`Mountain Moisture took: ${endTime-startTime}`);
+
+  //setLoadPercentage(45, 'Mapping temperature...');
+
+  startTime = new Date().getTime();
+
+  temperatureMap();
+
+  endTime = new Date().getTime();
+  console.log(`Temperature Map took: ${endTime-startTime}`);
+
+  //setLoadPercentage(50, 'Mapping moisture...');
+
+  startTime = new Date().getTime();
+
+  moistureMap();
+
+  endTime = new Date().getTime();
+  console.log(`Moisture Map took: ${endTime-startTime}`);
+
+  //setLoadPercentage(70, 'Drawing map...');
+
+  startTime = new Date().getTime();
 
   // Draw everything after the terrain vals are generated
   drawMap(unitSize, mapDimension, "canvas", mapType);
 
+  endTime = new Date().getTime();
+  console.log(`Drawing map took: ${endTime-startTime}`);
+
+  startTime = new Date().getTime();
+
   if(genShadows){
+    //setLoadPercentage(90, 'Drawing shadows...');
     drawShadowMap(mapCtx, unitSize, mapDimension, sunX, sunY, sunZ);
   }
+
+  endTime = new Date().getTime();
+  console.log(`Drawing shadows took: ${endTime-startTime}`);
+
+  //setLoadPercentage(100, 'Finalizing...');
+
+  // Reveal canvas and legend,
+  $('#canvas-container').removeClass('is-hidden');
+  $('#canvas-legend').removeClass('is-hidden');
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  },0);
+
 }
 
+function temperatureMap() {
 
+  for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
+    for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
+      var height = heightMapData[x][y];
+
+      // Calc Temperature - https://www.desmos.com/calculator/qjyw7kyvth
+      let heightBeyondOcean = height - settings.oceanHeight;
+      if(0 > heightBeyondOcean) { heightBeyondOcean = 0; }
+      mapData[x][y].temperature = settings.temperatureGlobal + (-3.5*Math.pow(heightBeyondOcean, 2)+1.86*heightBeyondOcean+0.6);
+      //+ (1.0-(Math.pow(0.01, -1*heightBeyondOcean+1-settings.oceanHeight))+Math.pow(heightBeyondOcean, 0.2)-0.65);
+    }
+  }
+
+}
+
+ function moistureMap() {
+
+    for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
+      for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
+
+        // Calc Moisture // TODO - Include river moisture?
+
+        mapData[x][y].moisture = settings.moistureGlobal + (mapData[x][y].nearOcean*settings.oceanMoistureModifier + mapData[x][y].mountainMoisture);
+      }
+    }
+
+ }
 
 // Draw the map
 function drawMap(unitSize, mapDimension, canvasId, mapType){
@@ -105,9 +281,8 @@ function drawMap(unitSize, mapDimension, canvasId, mapType){
   
   let rivers = [];
 
-  // Set color based off height.
-  for(x = 0; x <= mapDimension - 1; x += unitSize){
-    for(y = 0; y <= mapDimension - 1; y += unitSize){
+  for(x = 0; x < mapDimension; x += unitSize){
+    for(y = 0; y < mapDimension; y += unitSize){
         colorFill = {r : 0, g : 0, b : 0};
         var height = heightMapData[x][y];
 
@@ -119,34 +294,6 @@ function drawMap(unitSize, mapDimension, canvasId, mapType){
             rivers.push({x, y});
           }
         }
-
-        // Set mapData
-        mapData[x][y] = {};
-        mapData[x][y].height = height;
-
-        // Calc Temperature - https://www.desmos.com/calculator/76cf4cbimj
-        let heightBeyondOcean = height - settings.oceanHeight;
-        if(0 > heightBeyondOcean) { heightBeyondOcean = 0; }
-        mapData[x][y].temperature = 1.0-(Math.pow(0.01, -1*heightBeyondOcean+1-settings.oceanHeight))
-                    +Math.pow(heightBeyondOcean, 0.2)-0.65;
-
-        // Calc Moisture // TODO - Include change moisture by winds and side of mountain // Include river moisture?
-        let nearbyOceanWeight = nearbyOcean(heightMapData, {x, y}, settings);
-        mapData[x][y].moisture = nearbyOceanWeight;
-
-
-
-
-
-
-
-
-        //colorFill.g += mapData[x][y].moisture*80;
-        //colorFill.r += mapData[x][y].temperature*5;
-
-
-
-
 
         switch(mapType){
           case 1: // Color map
@@ -171,7 +318,27 @@ function drawMap(unitSize, mapDimension, canvasId, mapType){
                 colorFill = fade(waterStart, waterEnd, 30, parseInt(height * 100, 10));
               }
               break;
-          case 5:
+          case 4: // Near Ocean
+              let nearOcean = mapData[x][y].nearOcean;
+              var shade = Math.floor(nearOcean * 250);
+              colorFill = {r : shade, g : shade, b : shade};
+              break;
+          case 5: // Near Mountain
+              let nearMountain = mapData[x][y].nearMountain;
+              var shade = Math.floor(nearMountain * 250);
+              colorFill = {r : shade, g : shade, b : shade};
+              break;
+          case 6: // Mountain Moisture
+              let mountainMoisture = mapData[x][y].mountainMoisture+0.5;
+              var shade = Math.floor(mountainMoisture * 250);
+              colorFill = {r : shade, g : shade, b : shade};
+              break;
+          case 7: // Near Mountain + Mountain Moisture
+              let comb = (mapData[x][y].nearMountain+mapData[x][y].mountainMoisture+0.5)/2;
+              var shade = Math.floor(comb * 250);
+              colorFill = {r : shade, g : shade, b : shade};
+              break;
+          case 10:
               // Section of code modified from http://www.hyper-metrix.com/processing-js/docs/index.php?page=Plasma%20Fractals
               if (height < 0.5) {
                   r = height * gamma;
@@ -198,10 +365,6 @@ function drawMap(unitSize, mapDimension, canvasId, mapType){
               break;
         }
 
-
-
-
-
         setColor(imgData, colorFill, x, y, unitSize, canvasId);
 
         
@@ -210,13 +373,14 @@ function drawMap(unitSize, mapDimension, canvasId, mapType){
 
   console.log(mapData);
 
+  /*
   // Rivers
   console.log('Rivers Generated: '+rivers.length);
   for(let riverPoint of rivers){
-    //setColor(imgData, { r: 33, g: 80, b: 162 }, riverPoint.x, riverPoint.y, unitSize, canvasId);
     let river = new River(heightMapData, unitSize, riverPoint);
     river.setColor(imgData, { r: 33, g: 80, b: 122 }, unitSize, canvasId);
   }
+  */
 
 
   ctx.putImageData(img, 0, 0);

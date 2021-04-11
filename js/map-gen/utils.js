@@ -10,6 +10,7 @@ function round(n) {
 
 // smooth function
 function smooth(data, size, amt) {
+
     /* Rows, left to right */
     for (var x = 1; x < size; x++){
         for (var z = 0; z < size; z++){
@@ -72,89 +73,188 @@ function setColor(imgData, colorFill, x, y, unitSize, canvasId){
 
 }
 
-// Nearby ocean metric (0.0-1.0). Samples in square around point.
-function nearbyOcean(heightMapData, point, settings){
-  let unitSize = settings.unitSize;
 
-  let searchPoints = [
-    // Side Points
-    {x:point.x-settings.oceanSearchLength*unitSize,y:point.y},
-    {x:point.x+settings.oceanSearchLength*unitSize,y:point.y},
-    {x:point.x,y:point.y-settings.oceanSearchLength*unitSize},
-    {x:point.x,y:point.y+settings.oceanSearchLength*unitSize},
+function generateNearbyOcean(mapData, settings){
+  let size = settings.mapDimension;
+  let amt = settings.oceanMoistureSpread;
 
-    // Corner Points
-    {x:point.x-settings.oceanSearchLength*unitSize,y:point.y-settings.oceanSearchLength*unitSize},
-    {x:point.x+settings.oceanSearchLength*unitSize,y:point.y-settings.oceanSearchLength*unitSize},
-    {x:point.x+settings.oceanSearchLength*unitSize,y:point.y+settings.oceanSearchLength*unitSize},
-    {x:point.x-settings.oceanSearchLength*unitSize,y:point.y+settings.oceanSearchLength*unitSize},
-
-    // Long Side Points
-    {x:point.x-settings.oceanSearchLength*2*unitSize,y:point.y},
-    {x:point.x+settings.oceanSearchLength*2*unitSize,y:point.y},
-    {x:point.x,y:point.y-settings.oceanSearchLength*2*unitSize},
-    {x:point.x,y:point.y+settings.oceanSearchLength*2*unitSize},
-  ];
-
-  let totalWeight = 0;
-  for(let point of searchPoints){
-    let weight;
-    try{
-      weight = (settings.oceanHeight > heightMapData[point.x][point.y]) ? 1.0/searchPoints.length : 0.0;
-    } catch(err){
-      weight = 0.5/searchPoints.length;
+  for(let x = 0; x < size; x+=settings.unitSize){
+    for(let y = 0; y < size; y+=settings.unitSize){
+      mapData[x][y].nearOcean = (settings.oceanHeight >= mapData[x][y].height) ? 1.0 : 0.0;
     }
-    totalWeight += weight;
   }
 
-  return totalWeight;
+  /* Rows, left to right */
+  for (var x = settings.unitSize; x < size; x+=settings.unitSize){
+    for (var z = 0; z < size; z+=settings.unitSize){
+      mapData[x][z].nearOcean = mapData[x - settings.unitSize][z].nearOcean * (1 - amt) + mapData[x][z].nearOcean * amt;
+    }
+  }
+
+  /* Rows, right to left*/
+  for (x = size - 2*settings.unitSize; x < -1*settings.unitSize; x-=settings.unitSize){
+      for (z = 0; z < size; z+=settings.unitSize){
+        mapData[x][z].nearOcean = mapData[x + settings.unitSize][z].nearOcean * (1 - amt) + mapData[x][z].nearOcean * amt;
+      }
+  }
+
+  /* Columns, bottom to top */
+  for (x = 0; x < size; x+=settings.unitSize){
+      for (z = settings.unitSize; z < size; z+=settings.unitSize){
+        mapData[x][z].nearOcean = mapData[x][z - settings.unitSize].nearOcean * (1 - amt) + mapData[x][z].nearOcean * amt;
+      }
+  }
+
+  /* Columns, top to bottom */
+  for (x = 0; x < size; x+=settings.unitSize){
+      for (z = size; z < -1*settings.unitSize; z-=settings.unitSize){
+        mapData[x][z].nearOcean = mapData[x][z + settings.unitSize].nearOcean * (1 - amt) + mapData[x][z].nearOcean * amt;
+      }
+  }
+
 }
+
+
+function generateNearbyMountain(mapData, settings){
+  let size = settings.mapDimension;
+  let amt = settings.mountainMoistureSpread;
+
+  for(let x = 0; x < size; x+=settings.unitSize){
+    for(let y = 0; y < size; y+=settings.unitSize){
+      mapData[x][y].nearMountain = (settings.mountainHeight <= mapData[x][y].height) ? 1.0 : 0.0;
+    }
+  }
+
+  /* Rows, left to right */
+  for (var x = settings.unitSize; x < size; x+=settings.unitSize){
+    for (var z = 0; z < size; z+=settings.unitSize){
+      mapData[x][z].nearMountain = mapData[x - settings.unitSize][z].nearMountain * (1 - amt) + mapData[x][z].nearMountain * amt;
+    }
+  }
+
+  /* Rows, right to left*/
+  for (x = size - 2*settings.unitSize; x < -1*settings.unitSize; x-=settings.unitSize){
+      for (z = 0; z < size; z+=settings.unitSize){
+        mapData[x][z].nearMountain = mapData[x + settings.unitSize][z].nearMountain * (1 - amt) + mapData[x][z].nearMountain * amt;
+      }
+  }
+
+  /* Columns, bottom to top */
+  for (x = 0; x < size; x+=settings.unitSize){
+      for (z = settings.unitSize; z < size; z+=settings.unitSize){
+        mapData[x][z].nearMountain = mapData[x][z - settings.unitSize].nearMountain * (1 - amt) + mapData[x][z].nearMountain * amt;
+      }
+  }
+
+  /* Columns, top to bottom */
+  for (x = 0; x < size; x+=settings.unitSize){
+      for (z = size; z < -1*settings.unitSize; z-=settings.unitSize){
+        mapData[x][z].nearMountain = mapData[x][z + settings.unitSize].nearMountain * (1 - amt) + mapData[x][z].nearMountain * amt;
+      }
+  }
+
+}
+
+function generateMountainMoisture(mapData, settings) {
+
+  let populateMountainMoisture = function(s_x, s_y, moistureVal) {
+    for(let x = 0; x < settings.mapDimension; x+=settings.unitSize){
+      for(let y = 0; y < settings.mapDimension; y+=settings.unitSize){
+        if(mapData[x][y].mountainMoisture == null){
+          mapData[x][y].mountainMoisture = 0;
+        }
+        try {
+          let sidePointData = mapData[x+s_x*settings.unitSize][y+s_y*settings.unitSize];
+          if(sidePointData.nearMountain > mapData[x][y].nearMountain){
+            let mountDiff = sidePointData.nearMountain - mapData[x][y].nearMountain;
+            if(mountDiff > settings.moistureNearMountainMin && mountDiff < settings.moistureNearMountainMax) {
+              mapData[x][y].mountainMoisture += moistureVal;
+            } else {
+              //console.log(mountDiff);
+            }
+          }
+        } catch (err) {}
+      }
+    }
+  }
+
+  if(settings.windsDirection == 'WEST-TO-EAST'){
+    populateMountainMoisture(-1, 0, settings.mountainAffectOnMoisture); // WEST wet
+    populateMountainMoisture(1, 0, -1*settings.mountainAffectOnMoisture); // EAST dry
+  } else if(settings.windsDirection == 'EAST-TO-WEST'){
+    populateMountainMoisture(-1, 0, -1*settings.mountainAffectOnMoisture); // WEST dry
+    populateMountainMoisture(1, 0, settings.mountainAffectOnMoisture); // EAST wet
+  } else if(settings.windsDirection == 'NORTH-TO-SOUTH'){
+    populateMountainMoisture(0, -1, settings.mountainAffectOnMoisture); // NORTH wet
+    populateMountainMoisture(0, 1, -1*settings.mountainAffectOnMoisture); // SOUTH dry
+  } else if(settings.windsDirection == 'SOUTH-TO-NORTH'){
+    populateMountainMoisture(0, -1, -1*settings.mountainAffectOnMoisture); // NORTH dry
+    populateMountainMoisture(0, 1, settings.mountainAffectOnMoisture); // SOUTH wet
+  } else {
+    for(let x = 0; x < settings.mapDimension; x+=settings.unitSize){
+      for(let y = 0; y < settings.mapDimension; y+=settings.unitSize){
+        mapData[x][y].mountainMoisture = 0.0;
+      }
+    }
+  }
+
+}
+
 
 // Determines biomes
 function getBiome(mapData, point){
 
+  const MAX_VAL = 100.00;
+  const MIN_VAL = -100.00;
+
   const data = mapData[point.x][point.y];
   const moisture = data.moisture;
   const temperature = data.temperature;
+  const nearMountain = data.nearMountain;
 
-  if(moisture >= 0.00 && moisture <= 0.25 && temperature <= 1.00 && temperature > 0.70){
-    return 'DESERT';
+  if(moisture > 0.25 && moisture <= 0.75 && temperature <= 0.50 && temperature > 0.25){
+    return 'TAIGA';
   }
 
-  if(moisture > 0.25 && moisture <= 0.50 && temperature <= 1.00 && temperature > 0.75){
-    return 'SAVANNA';
+  if(moisture >= MIN_VAL && moisture <= 0.50 && temperature <= 0.25 && temperature >= MIN_VAL){
+    return 'TUNDRA';
   }
 
-  if(moisture >= 0.00 && moisture <= 0.25 && temperature <= 0.70 && temperature > 0.25){
+  if(moisture >= MIN_VAL && moisture <= 0.25 && temperature <= 0.70 && temperature > 0.25){
     return 'PLAINS';
   }
 
-  if(moisture > 0.25 && moisture <= 0.50 && temperature <= 0.75 && temperature > 0.50){
-    return 'SHRUBLAND';
+  /* Temp Biome */
+  if(nearMountain > 0.7) {
+    return 'MOUNTAIN';
   }
 
-  if(moisture > 0.50 && moisture <= 0.75 && temperature <= 1.00 && temperature > 0.75){
+  if(moisture > 0.50 && moisture <= 0.75 && temperature <= MAX_VAL && temperature > 0.75){
     return 'SEASONAL-FOREST';
   }
 
-  if(moisture > 0.75 && moisture <= 1.00 && temperature <= 1.00 && temperature > 0.75){
-    return 'RAIN-FOREST';
+  if(moisture > 0.75 && moisture <= MAX_VAL && temperature <= MAX_VAL && temperature > 0.75){
+    return 'RAINFOREST';
   }
 
   if(moisture > 0.50 && moisture <= 0.75 && temperature <= 0.75 && temperature > 0.50){
     return 'FOREST';
   }
 
-  if(moisture > 0.75 && moisture <= 0.85 && temperature <= 0.75 && temperature > 0.50){
+  if(moisture > 0.75 && moisture <= MAX_VAL && temperature <= 0.75 && temperature > 0.50){
     return 'SWAMP';
   }
 
-  if(moisture > 0.25 && moisture <= 0.75 && temperature <= 0.50 && temperature > 0.25){
-    return 'TAIGA';
+  if(moisture > 0.25 && moisture <= 0.50 && temperature <= MAX_VAL && temperature > 0.75){
+    return 'SAVANNA';
   }
 
-  if(moisture >= 0.00 && moisture <= 0.50 && temperature <= 0.25 && temperature >= 0.00){
-    return 'TUNDRA';
+  if(moisture > 0.25 && moisture <= 0.50 && temperature <= 0.75 && temperature > 0.50){
+    return 'SHRUBLAND';
+  }
+
+  if(moisture >= MIN_VAL && moisture <= 0.25 && temperature <= MAX_VAL && temperature > 0.70){
+    return 'DESERT';
   }
 
   return 'NONE';
@@ -170,25 +270,28 @@ function getBiomeColor(biome){
   } else if (biome == 'PLAINS') {
     colorFill = {r:121, g:145, b:78};
   } else if (biome == 'SHRUBLAND') {
-    colorFill = {r:79, g:102, b:72};
+    colorFill = {r:116, g:135, b:82};
   } else if (biome == 'SEASONAL-FOREST') {
     colorFill = {r:144, g:165, b:36};
-  } else if (biome == 'RAIN-FOREST') {
+  } else if (biome == 'RAINFOREST') {
     colorFill = {r:31, g:119, b:7};
   } else if (biome == 'FOREST') {
-    colorFill = {r:65, g:109, b:53};
+    colorFill = {r:54, g:86, b:13};
   } else if (biome == 'SWAMP') {
-    colorFill = {r:14, g:51, b:4};
+    colorFill = {r:50, g:56, b:12};
   } else if (biome == 'TAIGA') {
     colorFill = {r:44, g:71, b:46};
   } else if (biome == 'TUNDRA') {
     colorFill = {r:195, g:196, b:194};
+  } else if (biome == 'MOUNTAIN') {
+    colorFill = {r:71, g:51, b:28};
   } else {
-    colorFill = {r:0, g:0, b:0};
+    colorFill = {r:221, g:37, b:175};
   }
   return colorFill;
 }
 
 function getBiomeList(){
-  return ['DESERT','SAVANNA','PLAINS','SHRUBLAND','SEASONAL-FOREST','RAIN-FOREST','FOREST','SWAMP','TAIGA','TUNDRA'];
+  return ['DESERT','FOREST','MOUNTAIN','PLAINS','RAINFOREST','SAVANNA','SEASONAL-FOREST','SHRUBLAND',
+          'SWAMP','TAIGA','TUNDRA'];
 }

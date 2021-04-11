@@ -4,6 +4,7 @@ export default class River {
     this.oceanHeight = 0.3;
 
     this.riverPoints = [];
+    this.lakePoints = [];
 
     this.generate(heightMapData, unitSize, startPoint);
 
@@ -11,6 +12,10 @@ export default class River {
 
   get points(){
     return this.riverPoints;
+  }
+
+  get lake_points(){
+    return this.lakePoints;
   }
 
   generate = (heightMapData, unitSize, currentPoint) => {
@@ -23,6 +28,9 @@ export default class River {
                             {x: currentPoint.x, y: currentPoint.y-unitSize},
                             {x: currentPoint.x, y: currentPoint.y+unitSize}];
 
+    let lowestHeightNotCurrent = 1.00;
+    let lowestPointNotCurrent = null;
+
     let lowestPoint = currentPoint;
     for(let point of surroundingPoints){
       let height;
@@ -32,12 +40,31 @@ export default class River {
       if(heightMapData[lowestPoint.x][lowestPoint.y] > height){
         lowestPoint = point;
       }
+      if(lowestHeightNotCurrent > height){
+        lowestHeightNotCurrent = height;
+        lowestPointNotCurrent = point;
+      }
     }
 
     if(lowestPoint != currentPoint){
       this.riverPoints.push(lowestPoint);
       this.generate(heightMapData, unitSize, lowestPoint);
     } else {
+
+      //console.log('River ended');
+      //console.log(lowestPointNotCurrent);
+      if(lowestPointNotCurrent != null){
+
+        //console.log('Generate lake point');
+        this.lakePoints.push(lowestPointNotCurrent);
+        this.generate(heightMapData, unitSize, lowestPointNotCurrent);
+        /*
+          Mark points that are already lake or river points?
+          Concerned that points may be infiently looping in a circle.
+        */
+
+      }
+
       /*
       console.log('Current Height: '+currentHeight);
       for(let point of surroundingPoints){
@@ -55,6 +82,10 @@ export default class River {
   setColor = (imgData, colorFill, unitSize, canvasId) => {
     //console.log('Coloring River Points: '+this.riverPoints.length);
     for(const point of this.riverPoints){
+      setColor(imgData, colorFill, point.x, point.y, unitSize, canvasId);
+    }
+    for(const point of this.lakePoints){
+      colorFill.b += 20;
       setColor(imgData, colorFill, point.x, point.y, unitSize, canvasId);
     }
   }

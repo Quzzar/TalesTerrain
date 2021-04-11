@@ -1,0 +1,108 @@
+
+/* Typography */
+.is-underlined {
+  text-decoration: underline;
+}
+.is-bold-very {
+  font-weight: 900;
+}
+.is-bold {
+  font-weight: 675;
+}
+strong {
+  font-weight: 675;
+}
+.is-weight-normal {
+  font-weight: 400;
+}
+.is-thin {
+  font-weight: 200;
+}
+.is-thin-very {
+  font-weight: 100;
+}
+.is-underlined-thin {
+  border-bottom: 1px solid;
+  border-color: inherit;
+}
+.has-text-center-justified {
+  text-align: justify!important;
+  text-align-last: center!important;
+}
+
+/* Text Colors */
+.has-text-grey-kinda-dark {
+  color: hsl(0, 0%, 38%)!important;
+}
+
+.has-text-gold {
+  color: #eec00b!important;
+}
+.has-text-brown {
+  color: #9D876E!important;
+}
+.has-text-turquoise {
+  color: #3D9DA8!important;
+}
+.has-text-purple {
+  color: #925DA2!important;
+}
+
+/* Text Sizes */
+.is-size-8 {
+  font-size: 0.5rem!important;
+}
+.is-size-6-5 {
+  font-size: 0.85rem!important;
+}
+.is-size-5-5 {
+  font-size: 1.1rem!important;
+}
+.is-size-3-5 {
+  font-size: 1.75rem!important;
+}
+
+/* Button Sizes */
+.button.is-very-small {
+  font-size: 0.6rem!important;
+}
+
+/* Relative and Absolute */
+.pos-relative { position: relative; }
+.pos-absolute { position: absolute!important; }
+
+.pos-absolute.pos-t-0 { top: 0px; }
+.pos-absolute.pos-t-1 { top: 1px; }
+.pos-absolute.pos-t-2 { top: 2px; }
+.pos-absolute.pos-t-3 { top: 3px; }
+.pos-absolute.pos-t-4 { top: 4px; }
+.pos-absolute.pos-t-5 { top: 5px; }
+.pos-absolute.pos-t-10 { top: 10px; }
+.pos-absolute.pos-t-15 { top: 15px; }
+.pos-absolute.pos-t-20 { top: 20px; }
+
+.pos-absolute.pos-l-0 { left: 0px; }
+.pos-absolute.pos-l-1 { left: 1px; }
+.pos-absolute.pos-l-2 { left: 2px; }
+.pos-absolute.pos-l-3 { left: 3px; }
+.pos-absolute.pos-l-4 { left: 4px; }
+.pos-absolute.pos-l-5 { left: 5px; }
+.pos-absolute.pos-l-10 { left: 10px; }
+.pos-absolute.pos-l-15 { left: 15px; }
+.pos-absolute.pos-l-20 { left: 20px; }
+
+.pos-absolute.pos-r-0 { right: 0px; }
+.pos-absolute.pos-r-1 { right: 1px; }
+.pos-absolute.pos-r-2 { right: 2px; }
+.pos-absolute.pos-r-3 { right: 3px; }
+.pos-absolute.pos-r-4 { right: 4px; }
+.pos-absolute.pos-r-5 { right: 5px; }
+.pos-absolute.pos-r-10 { right: 10px; }
+.pos-absolute.pos-r-15 { right: 15px; }
+.pos-absolute.pos-r-20 { right: 20px; }
+
+
+/* Field Label */
+.field-label.is-long {
+  flex-grow: 2 !important;
+}

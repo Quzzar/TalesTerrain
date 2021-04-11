@@ -1,0 +1,25 @@
+
+#size-panel {
+
+
+
+}
+
+#loading-canvas-container {
+  width: 40vw;
+  min-width: 200px;
+  padding: 3rem;
+}
+
+.panel {
+
+  background-color: rgb(235, 235, 235);
+  border-radius: 15px;
+  width: 30vw;
+  min-width: 200px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+}

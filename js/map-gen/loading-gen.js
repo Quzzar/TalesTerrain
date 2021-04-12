@@ -15,11 +15,11 @@ function updateLoadBar(){
   $('#loading-message').text(g_canvasLoadMessage);
   if(isLoaded()){
     $('#loading-canvas-container').addClass('is-hidden');
-    $('#canvas-container').removeClass('is-hidden');
+    //$('#canvas-container').removeClass('is-hidden');
     $('#canvas-legend').removeClass('is-hidden');
   } else {
     $('#loading-canvas-container').removeClass('is-hidden');
-    $('#canvas-container').addClass('is-hidden');
+    //$('#canvas-container').addClass('is-hidden');
     $('#canvas-legend').addClass('is-hidden');
   }
 

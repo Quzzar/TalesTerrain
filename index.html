@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="css/bulma-extension.css" type="text/css"/>
 
     <link rel="stylesheet" href="css/main.css" type="text/css"/>
-    <link rel="stylesheet" href="css/terrain.css" type="text/css"/>
     <link rel="stylesheet" href="css/background.css" type="text/css"/>
 
 
@@ -43,10 +42,11 @@
       </figure>
       <span class="pl-1 is-size-5">TalesTerrain</span>
     </div>
-    <div id="canvas-container" class="pl-5 pt-6 is-hidden">
-      <canvas id="canvas" width="10" height="10"></canvas>
+    <div id="canvas-container" class="px-5 pt-6 is-hidden">
+      <canvas id="mapCanvas" class="is-hidden"></canvas>
+      <canvas id="shadowCanvas" class="is-hidden"></canvas>
+      <canvas id="map3dCanvas" class="is-hidden"></canvas>
       <img id="imgSave"></img>
-      <!-- <canvas id="voxelview" width="10" height="10"></canvas> -->
     </div>
     <div id="loading-spinner-container">
       <span class="icon has-text-link">
@@ -146,7 +146,7 @@
               <select id="setting-displayType">
                 <option value="STANDARD">2D-Standard</option>
                 <option value="SHADOWS">2D-Shadows</option>
-                <option value="3D">3D</option>
+                <!--<option value="3D">3D</option>-->
               </select>
             </div>
           </div>

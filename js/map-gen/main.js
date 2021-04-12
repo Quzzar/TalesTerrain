@@ -1,13 +1,16 @@
 import HeightMap from '../height-map.js';
 import River from '../river.js';
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/three.module.js';
 
 window.onload = () => {
 
   // Regenerate Map Button
   $('#regenerate-map-btn').on("click", function(){
-    $('#canvas-container').addClass('is-hidden');
-    $('#canvas-legend').addClass('is-hidden');
     $('#loading-spinner-container').removeClass('is-hidden');
+    //$('#canvas-container').addClass('is-hidden');
+    $('#canvas-legend').addClass('is-hidden');
+
+    $('#map3dCanvas').addClass('is-hidden');
     setTimeout(() => {
       settings.render();
     },0);
@@ -62,10 +65,6 @@ window.onload = () => {
   },0);
 }
 
-
-
-let mapCanvas = document.getElementById('canvas');
-let imgSave = document.getElementById('imgSave');
 let settings = {
     mapDimension : 512,
     unitSize : 2,
@@ -83,7 +82,7 @@ let settings = {
     oceanMoistureModifier: 0.4,
     oceanMoistureSpread: 0.01, // Smaller = larger spread
 
-    windsDirection: 'NONE', // WEST-TO-EAST, EAST-TO-WEST, NORTH-TO-SOUTH, SOUTH-TO-NORTH, NONE
+    windsDirection: 'WEST-TO-EAST', // WEST-TO-EAST, EAST-TO-WEST, NORTH-TO-SOUTH, SOUTH-TO-NORTH, NONE
     mountainHeight: 0.8,
     mountainMoistureSpread: 0.05, // Smaller = larger spread
     mountainAffectOnMoisture: 0.3,
@@ -104,18 +103,26 @@ let settings = {
 let startTime;
 let endTime;
 
+let mapCanvas = document.getElementById("mapCanvas");
+let shadowCanvas = document.getElementById("shadowCanvas");
+let map3dCanvas = document.getElementById("map3dCanvas");
+
+let mapCtx = mapCanvas.getContext("2d");
+let shadowCtx = shadowCanvas.getContext("2d");
+let map3dCtx = map3dCanvas.getContext('webgl') || map3dCanvas.getContext('experimental-webgl');
+
 let mapData;
 let heightMapData;
 
 function terrainGeneration(){
   "use strict";
 
+  mapCanvas.width = mapCanvas.height = settings.mapDimension;
+  shadowCanvas.width = shadowCanvas.height = settings.mapDimension;
+
   //setLoadPercentage(10, 'Generating heightmap...');
   startTime = new Date().getTime();
 
-  let mapCanvas = document.getElementById('canvas');
-  mapCanvas.width = settings.mapDimension;
-  mapCanvas.height = settings.mapDimension;
   heightMapData = new HeightMap(settings.mapDimension, settings.unitSize, settings.roughness).heightMapData;
 
   endTime = new Date().getTime();
@@ -209,18 +216,83 @@ function terrainGeneration(){
 
   if(settings.displayType == 'STANDARD'){
 
-    let mapCtx = mapCanvas.getContext("2d");
-
-    drawMap(mapCtx);
+    drawMap();
 
   } else if(settings.displayType == 'SHADOWS'){
 
-    let mapCtx = mapCanvas.getContext("2d");
+    drawMap();
+    drawShadowMap();
 
-    drawMap(mapCtx);
-    drawShadowMap(mapCtx);
+  } /*else if(settings.displayType == '3D'){
+    $('#map3dCanvas').removeClass('is-hidden');
 
-  }
+    if (!map3dCtx || !(map3dCtx instanceof WebGLRenderingContext) ) {
+      alert('Failed to get WebGL context. Try using a different display option or a different browser.');
+    }
+
+
+    let camera, scene, renderer;
+
+    scene = new THREE.Scene();
+
+    //camera = new THREE.PerspectiveCamera( 70, 1, 0.01, 10 );
+
+    camera = new THREE.PerspectiveCamera( 15, 1 );
+    camera.position.z = 800;
+    camera.position.x = 50;
+    camera.position.y = 200;
+    camera.lookAt(scene.position);
+    //camera.updateMatrix();
+
+    //
+
+    let geometry = new THREE.BufferGeometry();
+
+    let mapPointArray = [];
+    for(let x = 0; x < settings.mapDimension/settings.unitSize; x++){
+      for(let y = 0; y < settings.mapDimension/settings.unitSize; y++){
+        let z = mapData[x*settings.unitSize][y*settings.unitSize].height;
+
+        mapPointArray.push(z*50);
+        mapPointArray.push(y);
+        mapPointArray.push(x);
+
+      }
+    }
+
+    const vertices = new Float32Array(mapPointArray);
+
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+
+    console.log(geometry);
+    geometry.computeTangents();
+    geometry.computeVertexNormals();
+
+    console.log(new THREE.CylinderGeometry( 5, 5, 20, 32 ));
+
+    let material = new THREE.MeshDepthMaterial();
+    material.side = THREE.DoubleSide;
+
+    let mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    //
+
+    renderer = new THREE.WebGLRenderer( { antialias: false, canvas: map3dCanvas } );
+    renderer.setSize(settings.mapDimension, settings.mapDimension);
+    renderer.setAnimationLoop( animation );
+    
+    function animation( time ) {
+
+      mesh.rotation.z = time / 2000;
+      mesh.rotation.x = time / 2000;
+      //mesh.rotation.y = time / 2000;
+
+      renderer.render( scene, camera );
+
+    }
+
+  }*/
 
   endTime = new Date().getTime();
   console.log(`Drawing map took: ${endTime-startTime}`);
@@ -399,8 +471,8 @@ function colorMap(){
 }
 
 // Draw the map
-function drawMap(mapCtx){
-  let img = mapCtx.createImageData(canvas.height, canvas.width);
+function drawMap(){
+  let img = mapCtx.createImageData(mapCanvas.height, mapCanvas.width);
   let imgData = img.data;
 
   // For each unit,
@@ -411,7 +483,7 @@ function drawMap(mapCtx){
       // For each pixel,
       for (var w = 0; w <= settings.unitSize; w++) {
         for (var h = 0; h <= settings.unitSize; h++) {
-          var pData = ( ~~(x + w) + ( ~~(y + h) * canvas.width)) * 4;
+          var pData = ( ~~(x + w) + ( ~~(y + h) * mapCanvas.width)) * 4;
     
           imgData[pData] = colorFill.r;
           imgData[pData + 1] = colorFill.g;
@@ -427,15 +499,14 @@ function drawMap(mapCtx){
 
   // Add to an image so its easier to save
   var strDataURI = mapCanvas.toDataURL();
-  imgSave.src = strDataURI;
+  $('#imgSave').attr('src', strDataURI);
 
 }
 
 
 //Create Shadowmap
-function drawShadowMap(mapCtx){
-  var shadowCanvas = document.createElement("canvas"),
-    sCtx = shadowCanvas.getContext("2d"),
+function drawShadowMap(){
+  var
     x = 0, y = 0,
     idx,
     colorFill = {r: 0, g: 0, b: 0, a: 0},
@@ -448,9 +519,7 @@ function drawShadowMap(mapCtx){
     sunPosY = settings.sunY,
     sunHeight = settings.sunZ;
 
-  shadowCanvas.width = shadowCanvas.height = mapDimension;
-
-  let img = sCtx.createImageData(shadowCanvas.width, shadowCanvas.height);
+  let img = shadowCtx.createImageData(shadowCanvas.width, shadowCanvas.height);
   let imgData = img.data;
 
   // Suns position
@@ -460,6 +529,8 @@ function drawShadowMap(mapCtx){
 
   for(x = 0; x < mapDimension; x += unitSize){
     for(y = 0; y < mapDimension; y += unitSize){
+        if( settings.oceanHeight > heightMapData[x][y]) { continue; }
+
         dX = sunX - x;
         dY = sunY - y;
         dZ = sunZ - heightMapData[x][y];
@@ -481,7 +552,7 @@ function drawShadowMap(mapCtx){
 
                 for (var w = 0; w < unitSize; w++) {
                     for (var h = 0; h < unitSize; h++) {
-                        var pData = (~~ (x + w) + (~~ (y + h) * canvas.width)) * 4;
+                        var pData = (~~ (x + w) + (~~ (y + h) * mapCanvas.width)) * 4;
 
                         imgData[pData] = colorFill.r;
                         imgData[pData + 1] = colorFill.g;
@@ -500,8 +571,9 @@ function drawShadowMap(mapCtx){
   }
 
 
-  sCtx.putImageData(img, 0, 0);
+  shadowCtx.putImageData(img, 0, 0);
+
   mapCtx.drawImage(shadowCanvas, 0, 0);
   var strDataURI = mapCanvas.toDataURL();
-  imgSave.src = strDataURI;
+  $('#imgSave').attr('src', strDataURI);
 }

@@ -5,7 +5,8 @@ import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/thr
 
 export default {
   drawCanvas: () => { drawCanvas(); },
-  colorMap: () => { colorMap(); }
+  colorMap: () => { colorMap(); },
+  updateBiomesList: () => { updateBiomesList(); },
 };
 
 window.onload = () => {
@@ -36,34 +37,49 @@ window.onload = () => {
       $('#settings-panel-contents').addClass('is-hidden');
     }
   });
+  $('.settings-panel-sub-section').each(function(){
+    const subPanel = $(this);
+    subPanel.find('.settings-panel-sub-bar').on("click", function(){
+      if(subPanel.find('.settings-panel-sub-contents').hasClass('is-hidden')){
+        // Is Closed
+        subPanel.find('.settings-panel-sub-chevron').removeClass('fa-chevron-down');
+        subPanel.find('.settings-panel-sub-chevron').addClass('fa-chevron-up');
+        subPanel.find('.settings-panel-sub-contents').removeClass('is-hidden');
+      } else {
+        // Is Open
+        subPanel.find('.settings-panel-sub-chevron').removeClass('fa-chevron-up');
+        subPanel.find('.settings-panel-sub-chevron').addClass('fa-chevron-down');
+        subPanel.find('.settings-panel-sub-contents').addClass('is-hidden');
+      }
+    });
+  });
 
-  // Handle Settings
-  Settings.initSettings(settings);
-
-  // Fill biomes legend
-  let biomes = getBiomeList();
-  let columnSize = Math.ceil(biomes.length/2);
-  for (let i = 0; i < biomes.length; i++) {
-    let columnID;
-    if(i < columnSize){
-      columnID = 'legend-column-1';
-    } else {
-      columnID = 'legend-column-2';
-    }
-    const biome = biomes[i];
-    let color = getBiomeColor(biome);
-    $('#'+columnID).append(`
-      <p class="is-size-7">
-        <span style="color: rgb(${color.r},${color.g},${color.b});">
-          <i class="fas fa-square"></i>
-        </span>
-        <span>
-          ${capitalizeWords(biome)}
-        </span>
-      </p>
+  // Biome Remapping
+  for(let biome of getBiomeList()){
+    let biomeName = capitalizeWords(biome);
+    let isChecked = !settings.biomeMapping[biome].remap;
+    $('#setting-biome-remap-container').append(`
+      <div class="setting-biome-remap is-flex">
+        <label class="checkbox pb-2 is-unselectable">
+          <input type="checkbox" checked="${isChecked}">
+          <span class="is-bold">${biomeName}</span>
+        </label>
+        <div class="biome-remap-section pl-1 is-hidden">
+          <span class="is-size-8">replaced w/</span>
+          <div class="select is-very-small">
+            <select class="select-biome-remap" data-current-biome="${biome}">
+            </select>
+          </div>
+        </div>
+      </div>
     `);
   }
 
+  // Update Biomes
+  updateBiomesList();
+
+  // Handle Settings
+  Settings.initSettings(settings);
 
   // Generate map
   setTimeout(() => {
@@ -104,7 +120,21 @@ let settings = {
     sunZ : 4,
     render : function(){
       terrainGeneration();
-    }
+    },
+    biomeMapping: {
+      CRAG: { remap: false, mapTo: 'DESERT' },
+      DESERT: { remap: false, mapTo: 'CRAG' },
+      FOREST: { remap: false, mapTo: 'CRAG' },
+      MOUNTAIN: { remap: false, mapTo: 'CRAG' },
+      PLAINS: { remap: false, mapTo: 'CRAG' },
+      RAINFOREST: { remap: false, mapTo: 'CRAG' },
+      SAVANNA: { remap: false, mapTo: 'CRAG' },
+      SEASONAL_FOREST: { remap: false, mapTo: 'CRAG' },
+      SHRUBLAND: { remap: false, mapTo: 'CRAG' },
+      SWAMP: { remap: false, mapTo: 'CRAG' },
+      TAIGA: { remap: false, mapTo: 'CRAG' },
+      TUNDRA: { remap: false, mapTo: 'CRAG' },
+    },
 };
 
 let startTime;
@@ -340,7 +370,7 @@ function colorMap(){
           colorFill = {r : standardShade, g : standardShade, b : standardShade};
           break;
         case 3: // Biome
-          let biome = getBiome(mapData, {x, y});
+          let biome = getBiome(mapData, {x, y}, settings);
           colorFill = getBiomeColor(biome);
           if (height >= 0 && height <= settings.oceanHeight) {
             colorFill = fade(waterStart, waterEnd, 30, parseInt(height * 100, 10));
@@ -589,5 +619,54 @@ function drawCanvas(){
     }
 
   }*/
+
+}
+
+
+function updateBiomesList(){
+
+  let enabledBiomesList = [];
+  for(let biome of getBiomeList()){
+    if(!settings.biomeMapping[biome].remap){
+      enabledBiomesList.push(biome);
+    }
+  }
+
+  // Populate remapping selections
+  $('.select-biome-remap').each(function(){
+    let currentBiome = $(this).attr('data-current-biome');
+    $(this).html('');
+    for(let biome of enabledBiomesList){
+      if(biome == currentBiome) { continue; }
+      let biomeName = capitalizeWords(biome);
+      $(this).append(`<option value="${biome}">${biomeName}</option>`);
+    }
+    $(this).trigger('change'); // Updates biomeMapping
+  });
+
+  // Fill biomes legend
+  let columnSize = Math.ceil(enabledBiomesList.length/2);
+  $('#legend-column-1').html('');
+  $('#legend-column-2').html('');
+  for (let i = 0; i < enabledBiomesList.length; i++) {
+    let columnID;
+    if(i < columnSize){
+      columnID = 'legend-column-1';
+    } else {
+      columnID = 'legend-column-2';
+    }
+    const biome = enabledBiomesList[i];
+    let color = getBiomeColor(biome);
+    $('#'+columnID).append(`
+      <p class="is-size-7">
+        <span style="color: rgb(${color.r},${color.g},${color.b});">
+          <i class="fas fa-square"></i>
+        </span>
+        <span>
+          ${capitalizeWords(biome)}
+        </span>
+      </p>
+    `);
+  }
 
 }

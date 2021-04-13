@@ -110,6 +110,31 @@ export default {
       $('#settingOutput-smoothIterations').text(val);
       settings.smoothIterations = val;
     });
+
+    // Biome Remapper //
+    $('.setting-biome-remap').each(function(){
+      const biomeRemapSelection = $(this).find('.biome-remap-section');
+      const biomeSelect = $(this).find('.select-biome-remap');
+      const currentBiome = biomeSelect.attr('data-current-biome');
+
+      const biomeCheckbox = $(this).find('input');
+      biomeCheckbox.on('input',() => {
+        let isChecked = biomeCheckbox.prop('checked');
+        if(isChecked) {
+          settings.biomeMapping[currentBiome].remap = false;
+          biomeRemapSelection.addClass('is-hidden');
+        } else {
+          settings.biomeMapping[currentBiome].remap = true;
+          biomeRemapSelection.removeClass('is-hidden');
+        }
+        Main.updateBiomesList();
+      });
+
+      biomeSelect.on('change',() => {
+        settings.biomeMapping[currentBiome].mapTo = biomeSelect.val();
+      });
+
+    });
   
   }
 

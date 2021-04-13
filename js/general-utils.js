@@ -26,16 +26,19 @@ function cloneObj(obj){
 /* Capitalizing */
 function capitalizeWord(word){
   if(word == null){ return null;}
+  word = word.replace(/_/g, ' ');
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 
 function capitalizeFirstLetterOfWord(word){
   if(word == null){ return null;}
+  word = word.replace(/_/g, ' ');
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 function capitalizeWords(str){
   if(str == null){ return null;}
+  str = str.replace(/_/g, ' ');
   return str.toLowerCase().replace(/(?:^|\s|["([{_-])+\S/g, match => match.toUpperCase());
 }
 

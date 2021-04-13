@@ -222,7 +222,7 @@ function generateMountainMoisture(mapData, settings) {
 
 
 // Determines biomes
-function getBiome(mapData, point){
+function getBiome(mapData, point, settings){
 
   const MAX_VAL = 100.00;
   const MIN_VAL = -100.00;
@@ -232,52 +232,62 @@ function getBiome(mapData, point){
   const temperature = data.temperature;
   const nearMountain = data.nearMountain;
 
+  // Using mapped biome (if current is disabled)
+  let biomeMapper = (biome) => {
+    let mapperData = settings.biomeMapping[biome];
+    if(mapperData.remap){
+      return mapperData.mapTo;
+    } else {
+      return biome;
+    }
+  };
+
   if(moisture > 0.25 && moisture <= 0.75 && temperature <= 0.50 && temperature > 0.25){
-    return 'TAIGA';
+    return biomeMapper('TAIGA');
   }
 
   if(moisture >= MIN_VAL && moisture <= 0.50 && temperature <= 0.25 && temperature >= MIN_VAL){
-    return 'TUNDRA';
+    return biomeMapper('TUNDRA');
   }
 
   if(moisture >= MIN_VAL && moisture <= 0.25 && temperature <= 0.70 && temperature > 0.25){
-    return 'PLAINS';
+    return biomeMapper('PLAINS');
   }
 
   /* Temp Biome */
   if(nearMountain > 0.7) {
-    return 'MOUNTAIN';
+    return biomeMapper('MOUNTAIN');
   }
 
   if(moisture > 0.50 && moisture <= 0.75 && temperature <= MAX_VAL && temperature > 0.75){
-    return 'SEASONAL-FOREST';
+    return biomeMapper('SEASONAL_FOREST');
   }
 
   if(moisture > 0.75 && moisture <= MAX_VAL && temperature <= MAX_VAL && temperature > 0.75){
-    return 'RAINFOREST';
+    return biomeMapper('RAINFOREST');
   }
 
   if(moisture > 0.50 && moisture <= 0.75 && temperature <= 0.75 && temperature > 0.50){
-    return 'FOREST';
+    return biomeMapper('FOREST');
   }
 
   if(moisture > 0.75 && moisture <= MAX_VAL && temperature <= 0.75 && temperature > 0.50){
-    return 'SWAMP';
+    return biomeMapper('SWAMP');
   }
 
   if(moisture > 0.25 && moisture <= 0.50 && temperature <= MAX_VAL && temperature > 0.75){
-    return 'SAVANNA';
+    return biomeMapper('SAVANNA');
   }
 
   if(moisture > 0.25 && moisture <= 0.50 && temperature <= 0.75 && temperature > 0.50){
-    return 'SHRUBLAND';
+    return biomeMapper('SHRUBLAND');
   }
 
   if(moisture >= MIN_VAL && moisture <= 0.25 && temperature <= MAX_VAL && temperature > 0.70){
-    return 'DESERT';
+    return biomeMapper('DESERT');
   }
 
-  return 'CRAG';
+  return biomeMapper('CRAG');
 
 }
 
@@ -291,7 +301,7 @@ function getBiomeColor(biome){
     colorFill = {r:121, g:145, b:78};
   } else if (biome == 'SHRUBLAND') {
     colorFill = {r:116, g:135, b:82};
-  } else if (biome == 'SEASONAL-FOREST') {
+  } else if (biome == 'SEASONAL_FOREST') {
     colorFill = {r:144, g:165, b:36};
   } else if (biome == 'RAINFOREST') {
     colorFill = {r:31, g:119, b:7};
@@ -314,6 +324,6 @@ function getBiomeColor(biome){
 }
 
 function getBiomeList(){
-  return ['CRAG','DESERT','FOREST','MOUNTAIN','PLAINS','RAINFOREST','SAVANNA','SEASONAL-FOREST','SHRUBLAND',
+  return ['CRAG','DESERT','FOREST','MOUNTAIN','PLAINS','RAINFOREST','SAVANNA','SEASONAL_FOREST','SHRUBLAND',
           'SWAMP','TAIGA','TUNDRA'];
 }

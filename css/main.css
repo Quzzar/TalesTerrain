@@ -20,6 +20,10 @@ hr.is-light {
   padding-bottom: 0.9rem;
 }
 
+.select-biome-remap {
+  max-width: 60px!important;
+}
+
 #loading-spinner-container {
   padding-left: 20vw;
   padding-top: 20vh;

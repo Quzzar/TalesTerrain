@@ -43,6 +43,7 @@
       <span class="pl-1 is-size-5">TalesTerrain <span class="is-size-7-5 is-italic">by Quzzar</span></span>
     </div>
     <div id="canvas-container" class="px-5 pt-6 is-hidden">
+      <p id="height-map-name" class="is-size-8 is-italic has-text-left is-hidden"></p>
       <canvas id="mapCanvas" class="is-hidden"></canvas>
       <canvas id="shadowCanvas" class="is-hidden"></canvas>
       <canvas id="map3dCanvas" class="is-hidden"></canvas>
@@ -71,19 +72,37 @@
     <!-- Right Side -->
     <div class="pos-absolute pos-t-15 pos-r-10 is-inline-flex">
       <div class="buttons">
-        <span class="button is-success is-rounded is-very-small is-outlined">
-          <span>Upload Heightmap</span>
+
+        <!-- Upload Height Map -->
+        <div id="upload-height-map-btn" class="pr-2">
+          <label for="input-upload-map">
+            <span class="button is-success is-rounded is-very-small is-outlined">
+              <span>Upload Heightmap</span>
+              <span class="icon">
+                <i class="fas fa-file-upload"></i>
+              </span>
+            </span>
+          </label>
+          <input id="input-upload-map" class="is-hidden" type="file" accept=".png,.jgp,.jpeg"/>
+        </div>
+        <!-- Remove Height Map -->
+        <span id="remove-height-map-btn" class="is-hidden button is-danger is-rounded is-very-small is-outlined">
+          <span>Remove Heightmap</span>
           <span class="icon">
-            <i class="fas fa-file-upload"></i>
+            <i class="fas fa-times"></i>
           </span>
         </span>
+
+        <!-- Regenerate Map -->
         <span id="regenerate-map-btn" class="button is-link is-rounded is-very-small is-outlined">
           <span>Regenerate</span>
           <span class="icon">
             <i class="fas fa-sync-alt"></i>
           </span>
         </span>
-        <span class="button is-info is-rounded is-small">Complete</span>
+
+        <!-- Complete Map -->
+        <span id="complete-map-btn" class="button is-info is-rounded is-small">Complete</span>
       </div>
     </div>
 
@@ -228,6 +247,37 @@
       </div>
     </div>
 
+
+    
+
+    <!-- Complete Modal -->
+    <div id="complete-modal" class="modal">
+      <div id="complete-modal-background" class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">
+            Convert to TaleSpire
+            <span class="has-text-success"><i class="fas fa-cubes"></i></span>
+          </p>
+          <button id="complete-modal-close-btn" class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+          <!-- Content ... -->
+          <span>Here</span>
+        </section>
+        <footer class="modal-card-foot">
+          <button id="complete-modal-convert-btn" class="button is-info is-outlined">
+            <span>Convert</span>
+            <span class="icon"><i class="fas fa-cogs"></i></span>
+          </button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="is-hidden">
+      <canvas id="heightmap-upload-canvas"></canvas>
+      <img id="heightmap-upload-image"></img>
+    </div>
 
   </body>
 </html>

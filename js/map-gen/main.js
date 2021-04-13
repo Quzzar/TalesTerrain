@@ -1,6 +1,7 @@
 import HeightMap from '../height-map.js';
 import River from '../river.js';
 import Settings from '../settings.js';
+import SpireHandler from '../talespire/spire-handler.js';
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/three.module.js';
 
 export default {
@@ -22,6 +23,37 @@ window.onload = () => {
       settings.render();
     },0);
   });
+
+  // Height Map Upload
+  const fileInput = document.querySelector('#input-upload-map');
+  fileInput.onchange = () => {
+    if (fileInput.files.length > 0) {
+
+      let file = fileInput.files[0];
+      let fileReader = new FileReader();
+
+      // Closure to capture the file information.
+      fileReader.onload = (function(capturedFile) {
+        return function(e) {
+          processHeightMap(capturedFile.name, e.target.result);
+        };
+      })(file);
+
+      fileReader.readAsDataURL(file);
+    }
+  }
+  // Height Map Remove
+  $('#remove-height-map-btn').on("click", function(){
+    $('#height-map-name').addClass('is-hidden');
+    $('#height-map-name').text('');
+    $('#input-upload-map').val('');
+    heightMap.isCustom = false;
+    heightMap.customInfo.fileName = '';
+    $('#remove-height-map-btn').addClass('is-hidden');
+    $('#upload-height-map-btn').removeClass('is-hidden');
+    $('#regenerate-map-btn').trigger('click');
+  });
+
 
   // Settings Panel (open/close)
   $('#settings-panel-top-bar').on("click", function(){
@@ -80,6 +112,9 @@ window.onload = () => {
 
   // Handle Settings
   Settings.initSettings(settings);
+
+  // Handle TaleSpire processing
+  SpireHandler.init(settings);
 
   // Generate map
   setTimeout(() => {
@@ -149,7 +184,13 @@ let shadowCtx = shadowCanvas.getContext("2d");
 let map3dCtx = map3dCanvas.getContext('webgl') || map3dCanvas.getContext('experimental-webgl');
 
 let mapData;
-let heightMapData;
+let heightMap = {
+  isCustom: false,
+  customInfo: {
+    fileName: '',
+  },
+  data: null,
+};
 
 function terrainGeneration(){
   "use strict";
@@ -160,7 +201,9 @@ function terrainGeneration(){
   //setLoadPercentage(10, 'Generating heightmap...');
   startTime = new Date().getTime();
 
-  heightMapData = new HeightMap(settings.mapDimension, settings.unitSize, settings.roughness).heightMapData;
+  if(!heightMap.isCustom){
+    heightMap.data = new HeightMap(settings.mapDimension, settings.unitSize, settings.roughness).heightMapData;
+  }
 
   endTime = new Date().getTime();
   console.log(`Creating heightmap took: ${endTime-startTime}`);
@@ -170,7 +213,7 @@ function terrainGeneration(){
 
   // Smooth terrain
   for(let i = 0; i < settings.smoothIterations; i++){
-    heightMapData = smooth(heightMapData, settings.mapDimension, settings.smoothness);
+    heightMap.data = smooth(heightMap.data, settings.mapDimension, settings.smoothness);
   }
 
   endTime = new Date().getTime();
@@ -187,7 +230,7 @@ function terrainGeneration(){
 
       // Set mapData
       mapData[x][y] = {};
-      mapData[x][y].height = heightMapData[x][y];
+      mapData[x][y].height = heightMap.data[x][y];
 
     }
   }
@@ -272,7 +315,7 @@ function temperatureMap() {
 
   for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
     for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
-      var height = heightMapData[x][y];
+      var height = heightMap.data[x][y];
 
       // Calc Temperature - https://www.desmos.com/calculator/qjyw7kyvth
       let heightBeyondOcean = height - settings.oceanHeight;
@@ -303,7 +346,7 @@ function generateRivers(){
 
   for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
     for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
-      let height = heightMapData[x][y];
+      let height = heightMap.data[x][y];
 
       // Potential river start
       if(height >= settings.riverStartHeight){
@@ -319,7 +362,7 @@ function generateRivers(){
   // OLD-Needs UPDATING
   console.log('Rivers Generated: '+rivers.length);
   for(let riverPoint of rivers){
-    let river = new River(heightMapData, unitSize, riverPoint);
+    let river = new River(heightMap.data, unitSize, riverPoint);
     river.setColor(imgData, { r: 33, g: 80, b: 122 }, unitSize, canvasId);
   }
 
@@ -350,7 +393,7 @@ function colorMap(){
 
   for(x = 0; x < settings.mapDimension; x += settings.unitSize){
     for(y = 0; y < settings.mapDimension; y += settings.unitSize){
-      let height = heightMapData[x][y];
+      let height = heightMap.data[x][y];
       colorFill = {r : 0, g : 0, b : 0};
 
       switch(settings.mapType){
@@ -491,11 +534,11 @@ function drawCanvas(){
 
     for(x = 0; x < mapDimension; x += unitSize){
       for(y = 0; y < mapDimension; y += unitSize){
-          if( settings.oceanHeight > heightMapData[x][y]) { continue; }
+          if( settings.oceanHeight > heightMap.data[x][y]) { continue; }
 
           dX = sunX - x;
           dY = sunY - y;
-          dZ = sunZ - heightMapData[x][y];
+          dZ = sunZ - heightMap.data[x][y];
 
           mag = Math.sqrt(dX * dX + dY * dY + dZ * dZ);
 
@@ -505,11 +548,11 @@ function drawCanvas(){
 
           pX = x;
           pY = y;
-          pZ = heightMapData[x][y];
+          pZ = heightMap.data[x][y];
 
           while(pX > 0 && pX < mapDimension && pY > 0 && pY < mapDimension && pZ < sunZ){
 
-              if((heightMapData[~~(pX)][~~(pY)]) > pZ){
+              if((heightMap.data[~~(pX)][~~(pY)]) > pZ){
                   colorFill = {r : 0, g : 0, b : 0, a : 200};
 
                   for (var w = 0; w < unitSize; w++) {
@@ -622,6 +665,80 @@ function drawCanvas(){
 
 }
 
+function processHeightMap(fileName, strDataURI){
+  console.log('> Processing Heightmap...');
+
+  $('#height-map-name').removeClass('is-hidden');
+  $('#height-map-name').text(fileName);
+
+  heightMap.isCustom = true;
+  heightMap.customInfo.fileName = fileName;
+
+  $('#upload-height-map-btn').addClass('is-hidden');
+  $('#remove-height-map-btn').removeClass('is-hidden');
+
+  /*
+    To get the pixel data of an image you need to:
+      - Store the image URI in an image
+      - Draw that image onto a canvas context
+      - Then read the pixel data from that canvas
+  */
+  $('#heightmap-upload-image').attr('src', strDataURI);
+  setTimeout(() => {// Need to timeout so image can load
+    
+    let imageSave = document.getElementById('heightmap-upload-image');
+    
+    // Crop image down to a working dimension
+    console.log('> Converting image size...');
+    let imageSize = (imageSave.width < imageSave.height) ? imageSave.width : imageSave.height;
+    console.log('Was: '+imageSize);
+    imageSize = Math.pow(2,Math.floor(Math.log(imageSize)/Math.log(2)));
+    console.log('Now: '+imageSize);
+
+    // Update settings to fit the image specs
+    settings.mapDimension = imageSize;
+    $('#setting-mapDimension').val(Math.log2(settings.mapDimension));
+    $('#settingOutput-mapDimension').text(settings.mapDimension);
+    let heightMapCanvas = document.getElementById("heightmap-upload-canvas");
+    heightMapCanvas.width = heightMapCanvas.height = settings.mapDimension;
+
+    settings.unitSize = 1;
+    $('#setting-unitSize').val(Math.log2(settings.unitSize));
+    $('#settingOutput-unitSize').text(settings.unitSize);
+
+    // Update canvas context
+    console.log('> Updating canvas context...');
+    let heightMapCtx = heightMapCanvas.getContext('2d');
+    heightMapCtx.drawImage(imageSave, 0, 0);
+    let imgData = heightMapCtx.getImageData(0, 0, imageSize, imageSize);
+  
+    // Build heightMap
+    console.log('> Building heightmap...');
+    let mapData = Array(settings.mapDimension + 1).fill(0).map(el => new Array(settings.mapDimension + 1).fill(0).map(el => 0));
+    for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
+      for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
+
+        var pData = (x + (y * heightMapCanvas.width)) * 4;
+        let r = imgData.data[pData];
+        let g = imgData.data[pData + 1];
+        let b = imgData.data[pData + 2];
+        let a = imgData.data[pData + 3];
+
+        //console.log(`HERE: ${r} ${g} ${b} ${a}`)
+        mapData[x][y] = (0.2126 * r + 0.7152 * g + 0.0722 * b)/100;
+        //console.log(mapData[x][y]);
+
+      }
+    }
+    heightMap.data = mapData;
+  
+    // Finish,
+    console.log('> Heightmap upload complete!');
+    $('#regenerate-map-btn').trigger('click');
+    $('#heightmap-upload-image').removeClass('is-hidden');
+  },10);
+
+}
 
 function updateBiomesList(){
 

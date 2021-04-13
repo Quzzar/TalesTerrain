@@ -57,3 +57,10 @@ function round(value, precision) {
   let multiplier = Math.pow(10, precision || 0);
   return Math.floor(value * multiplier) / multiplier;
 }
+
+function genUUIDv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}

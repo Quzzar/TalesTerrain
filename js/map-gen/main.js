@@ -752,12 +752,15 @@ function updateBiomesList(){
   // Populate remapping selections
   $('.select-biome-remap').each(function(){
     let currentBiome = $(this).attr('data-current-biome');
+    let selectedBiome = $(this).find(':selected').val();
     $(this).html('');
     for(let biome of enabledBiomesList){
       if(biome == currentBiome) { continue; }
       let biomeName = capitalizeWords(biome);
       $(this).append(`<option value="${biome}">${biomeName}</option>`);
     }
+    $(this).val(selectedBiome); // Sets to old biome value, take first value instead if missing
+    if($(this).find('option[value="'+selectedBiome+'"]').length <= 0){ $(this).prop('selectedIndex', 0); }
     $(this).trigger('change'); // Updates biomeMapping
   });
 

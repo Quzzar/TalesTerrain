@@ -1,12 +1,18 @@
 import HeightMap from '../height-map.js';
 import River from '../river.js';
+import Settings from '../settings.js';
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/three.module.js';
+
+export default {
+  drawCanvas: () => { drawCanvas(); },
+  colorMap: () => { colorMap(); }
+};
 
 window.onload = () => {
 
   // Regenerate Map Button
   $('#regenerate-map-btn').on("click", function(){
-    $('#loading-spinner-container').removeClass('is-hidden');
+    //$('#loading-spinner-container').removeClass('is-hidden');
     //$('#canvas-container').addClass('is-hidden');
     $('#canvas-legend').addClass('is-hidden');
 
@@ -32,14 +38,14 @@ window.onload = () => {
   });
 
   // Handle Settings
-  initSettings(settings);
+  Settings.initSettings(settings);
 
   // Fill biomes legend
   let biomes = getBiomeList();
-  let columnSize = Math.floor(biomes.length/2);
+  let columnSize = Math.ceil(biomes.length/2);
   for (let i = 0; i < biomes.length; i++) {
     let columnID;
-    if(i <= columnSize){
+    if(i < columnSize){
       columnID = 'legend-column-1';
     } else {
       columnID = 'legend-column-2';
@@ -67,29 +73,30 @@ window.onload = () => {
 
 let settings = {
     mapDimension : 512,
-    unitSize : 2,
+    unitSize : 1,
     mapType : 3,
     displayType : 'SHADOWS', // STANDARD, SHADOWS, 3D
 
     roughness : 5,
-    smoothness : 0.6,
+    smoothness : 0.4,
     smoothIterations : 1,
 
     riverStartChance : 0.005,
     riverStartHeight : 0.85,
 
     oceanHeight: 0.3,
-    oceanMoistureModifier: 0.4,
-    oceanMoistureSpread: 0.01, // Smaller = larger spread
+    oceanMoistureModifier: 0.2,
+    oceanMoistureSpread: 0.98,
 
     windsDirection: 'WEST-TO-EAST', // WEST-TO-EAST, EAST-TO-WEST, NORTH-TO-SOUTH, SOUTH-TO-NORTH, NONE
     mountainHeight: 0.8,
-    mountainMoistureSpread: 0.05, // Smaller = larger spread
-    mountainAffectOnMoisture: 0.3,
+    mountainSpread: 0.95,
+    mountainAffectOnMoisture: -0.4,
     moistureNearMountainMin: 0.002, // Difference in neighbor mountain height, used to determine if nearby a mountain
     moistureNearMountainMax: 0.019,
+    mountainMoistureSpread: 0.93,
 
-    moistureGlobal: 0.2,
+    moistureGlobal: 0.4,
     temperatureGlobal: 0.0,
 
     sunX : -100,
@@ -214,92 +221,12 @@ function terrainGeneration(){
   //setLoadPercentage(90, 'Drawing map...');
   startTime = new Date().getTime();
 
-  if(settings.displayType == 'STANDARD'){
-
-    drawMap();
-
-  } else if(settings.displayType == 'SHADOWS'){
-
-    drawMap();
-    drawShadowMap();
-
-  } /*else if(settings.displayType == '3D'){
-    $('#map3dCanvas').removeClass('is-hidden');
-
-    if (!map3dCtx || !(map3dCtx instanceof WebGLRenderingContext) ) {
-      alert('Failed to get WebGL context. Try using a different display option or a different browser.');
-    }
-
-
-    let camera, scene, renderer;
-
-    scene = new THREE.Scene();
-
-    //camera = new THREE.PerspectiveCamera( 70, 1, 0.01, 10 );
-
-    camera = new THREE.PerspectiveCamera( 15, 1 );
-    camera.position.z = 800;
-    camera.position.x = 50;
-    camera.position.y = 200;
-    camera.lookAt(scene.position);
-    //camera.updateMatrix();
-
-    //
-
-    let geometry = new THREE.BufferGeometry();
-
-    let mapPointArray = [];
-    for(let x = 0; x < settings.mapDimension/settings.unitSize; x++){
-      for(let y = 0; y < settings.mapDimension/settings.unitSize; y++){
-        let z = mapData[x*settings.unitSize][y*settings.unitSize].height;
-
-        mapPointArray.push(z*50);
-        mapPointArray.push(y);
-        mapPointArray.push(x);
-
-      }
-    }
-
-    const vertices = new Float32Array(mapPointArray);
-
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-
-    console.log(geometry);
-    geometry.computeTangents();
-    geometry.computeVertexNormals();
-
-    console.log(new THREE.CylinderGeometry( 5, 5, 20, 32 ));
-
-    let material = new THREE.MeshDepthMaterial();
-    material.side = THREE.DoubleSide;
-
-    let mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
-
-    //
-
-    renderer = new THREE.WebGLRenderer( { antialias: false, canvas: map3dCanvas } );
-    renderer.setSize(settings.mapDimension, settings.mapDimension);
-    renderer.setAnimationLoop( animation );
-    
-    function animation( time ) {
-
-      mesh.rotation.z = time / 2000;
-      mesh.rotation.x = time / 2000;
-      //mesh.rotation.y = time / 2000;
-
-      renderer.render( scene, camera );
-
-    }
-
-  }*/
+  drawCanvas();
 
   endTime = new Date().getTime();
   console.log(`Drawing map took: ${endTime-startTime}`);
 
   //setLoadPercentage(100, 'Finalizing...');
-
-  console.log(mapData);
 
   // Reveal canvas and legend / hide spinner
   $('#loading-spinner-container').addClass('is-hidden');
@@ -327,7 +254,7 @@ function temperatureMap() {
 
 }
 
- function moistureMap() {
+function moistureMap() {
 
     for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
       for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
@@ -367,6 +294,9 @@ function generateRivers(){
   }
 
 }
+
+
+
 
 function colorMap(){
 
@@ -470,110 +400,194 @@ function colorMap(){
 
 }
 
-// Draw the map
-function drawMap(){
-  let img = mapCtx.createImageData(mapCanvas.height, mapCanvas.width);
-  let imgData = img.data;
+function drawCanvas(){
 
-  // For each unit,
-  for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
-    for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
-      let colorFill = mapData[x][y].colorFill;
+  // Define main map draw
+  let drawMap = function(){
 
-      // For each pixel,
-      for (var w = 0; w <= settings.unitSize; w++) {
-        for (var h = 0; h <= settings.unitSize; h++) {
-          var pData = ( ~~(x + w) + ( ~~(y + h) * mapCanvas.width)) * 4;
-    
-          imgData[pData] = colorFill.r;
-          imgData[pData + 1] = colorFill.g;
-          imgData[pData + 2] = colorFill.b;
-          imgData[pData + 3] = 255;
+    let img = mapCtx.createImageData(mapCanvas.height, mapCanvas.width);
+    let imgData = img.data;
+
+    // For each unit,
+    for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
+      for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
+        let colorFill = mapData[x][y].colorFill;
+
+        // For each pixel,
+        for (var w = 0; w <= settings.unitSize; w++) {
+          for (var h = 0; h <= settings.unitSize; h++) {
+            var pData = ( ~~(x + w) + ( ~~(y + h) * mapCanvas.width)) * 4;
+      
+            imgData[pData] = colorFill.r;
+            imgData[pData + 1] = colorFill.g;
+            imgData[pData + 2] = colorFill.b;
+            imgData[pData + 3] = 255;
+          }
         }
+
       }
-
     }
+
+    mapCtx.putImageData(img, 0, 0);
+
+    // Add to an image so its easier to save
+    var strDataURI = mapCanvas.toDataURL();
+    $('#imgSave').attr('src', strDataURI);
+
   }
 
-  mapCtx.putImageData(img, 0, 0);
+  // Define shadowmap draw
+  let drawShadowMap = function(){
+    var
+      x = 0, y = 0,
+      idx,
+      colorFill = {r: 0, g: 0, b: 0, a: 0},
+      sunX, sunY, sunZ,
+      pX, pY, pZ,
+      mag, dX, dY, dZ,
+      unitSize = settings.unitSize,
+      mapDimension = settings.mapDimension,
+      sunPosX = settings.sunX,
+      sunPosY = settings.sunY,
+      sunHeight = settings.sunZ;
 
-  // Add to an image so its easier to save
-  var strDataURI = mapCanvas.toDataURL();
-  $('#imgSave').attr('src', strDataURI);
+    let img = shadowCtx.createImageData(shadowCanvas.width, shadowCanvas.height);
+    let imgData = img.data;
 
-}
+    // Suns position
+    sunX = sunPosX;
+    sunY = sunPosY;
+    sunZ = sunHeight;
 
+    for(x = 0; x < mapDimension; x += unitSize){
+      for(y = 0; y < mapDimension; y += unitSize){
+          if( settings.oceanHeight > heightMapData[x][y]) { continue; }
 
-//Create Shadowmap
-function drawShadowMap(){
-  var
-    x = 0, y = 0,
-    idx,
-    colorFill = {r: 0, g: 0, b: 0, a: 0},
-    sunX, sunY, sunZ,
-    pX, pY, pZ,
-    mag, dX, dY, dZ,
-    unitSize = settings.unitSize,
-    mapDimension = settings.mapDimension,
-    sunPosX = settings.sunX,
-    sunPosY = settings.sunY,
-    sunHeight = settings.sunZ;
+          dX = sunX - x;
+          dY = sunY - y;
+          dZ = sunZ - heightMapData[x][y];
 
-  let img = shadowCtx.createImageData(shadowCanvas.width, shadowCanvas.height);
-  let imgData = img.data;
+          mag = Math.sqrt(dX * dX + dY * dY + dZ * dZ);
 
-  // Suns position
-  sunX = sunPosX;
-  sunY = sunPosY;
-  sunZ = sunHeight;
+          dX = (dX / mag);
+          dY = (dY / mag);
+          dZ = (dZ / mag);
 
-  for(x = 0; x < mapDimension; x += unitSize){
-    for(y = 0; y < mapDimension; y += unitSize){
-        if( settings.oceanHeight > heightMapData[x][y]) { continue; }
+          pX = x;
+          pY = y;
+          pZ = heightMapData[x][y];
 
-        dX = sunX - x;
-        dY = sunY - y;
-        dZ = sunZ - heightMapData[x][y];
+          while(pX > 0 && pX < mapDimension && pY > 0 && pY < mapDimension && pZ < sunZ){
 
-        mag = Math.sqrt(dX * dX + dY * dY + dZ * dZ);
+              if((heightMapData[~~(pX)][~~(pY)]) > pZ){
+                  colorFill = {r : 0, g : 0, b : 0, a : 200};
 
-        dX = (dX / mag);
-        dY = (dY / mag);
-        dZ = (dZ / mag);
+                  for (var w = 0; w < unitSize; w++) {
+                      for (var h = 0; h < unitSize; h++) {
+                          var pData = (~~ (x + w) + (~~ (y + h) * mapCanvas.width)) * 4;
 
-        pX = x;
-        pY = y;
-        pZ = heightMapData[x][y];
+                          imgData[pData] = colorFill.r;
+                          imgData[pData + 1] = colorFill.g;
+                          imgData[pData + 2] = colorFill.b;
+                          imgData[pData + 3] += colorFill.a;
+                      }
+                  }
+                  break;
+              }
 
-        while(pX > 0 && pX < mapDimension && pY > 0 && pY < mapDimension && pZ < sunZ){
-
-            if((heightMapData[~~(pX)][~~(pY)]) > pZ){
-                colorFill = {r : 0, g : 0, b : 0, a : 200};
-
-                for (var w = 0; w < unitSize; w++) {
-                    for (var h = 0; h < unitSize; h++) {
-                        var pData = (~~ (x + w) + (~~ (y + h) * mapCanvas.width)) * 4;
-
-                        imgData[pData] = colorFill.r;
-                        imgData[pData + 1] = colorFill.g;
-                        imgData[pData + 2] = colorFill.b;
-                        imgData[pData + 3] += colorFill.a;
-                    }
-                }
-                break;
-            }
-
-            pX += (dX * unitSize);
-            pY += (dY * unitSize);
-            pZ += (dZ * unitSize);
-        }
+              pX += (dX * unitSize);
+              pY += (dY * unitSize);
+              pZ += (dZ * unitSize);
+          }
+      }
     }
+
+
+    shadowCtx.putImageData(img, 0, 0);
+
+    mapCtx.drawImage(shadowCanvas, 0, 0);
+    var strDataURI = mapCanvas.toDataURL();
+    $('#imgSave').attr('src', strDataURI);
   }
 
+  if(settings.displayType == 'STANDARD'){
 
-  shadowCtx.putImageData(img, 0, 0);
+    drawMap();
 
-  mapCtx.drawImage(shadowCanvas, 0, 0);
-  var strDataURI = mapCanvas.toDataURL();
-  $('#imgSave').attr('src', strDataURI);
+  } else if(settings.displayType == 'SHADOWS'){
+
+    drawMap();
+    drawShadowMap();
+
+  } /*else if(settings.displayType == '3D'){
+    $('#map3dCanvas').removeClass('is-hidden');
+
+    if (!map3dCtx || !(map3dCtx instanceof WebGLRenderingContext) ) {
+      alert('Failed to get WebGL context. Try using a different display option or a different browser.');
+    }
+
+
+    let camera, scene, renderer;
+
+    scene = new THREE.Scene();
+
+    //camera = new THREE.PerspectiveCamera( 70, 1, 0.01, 10 );
+
+    camera = new THREE.PerspectiveCamera( 15, 1 );
+    camera.position.z = 800;
+    camera.position.x = 50;
+    camera.position.y = 200;
+    camera.lookAt(scene.position);
+    //camera.updateMatrix();
+
+    //
+
+    let geometry = new THREE.BufferGeometry();
+
+    let mapPointArray = [];
+    for(let x = 0; x < settings.mapDimension/settings.unitSize; x++){
+      for(let y = 0; y < settings.mapDimension/settings.unitSize; y++){
+        let z = mapData[x*settings.unitSize][y*settings.unitSize].height;
+
+        mapPointArray.push(z*50);
+        mapPointArray.push(y);
+        mapPointArray.push(x);
+
+      }
+    }
+
+    const vertices = new Float32Array(mapPointArray);
+
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+
+    console.log(geometry);
+    geometry.computeTangents();
+    geometry.computeVertexNormals();
+
+    console.log(new THREE.CylinderGeometry( 5, 5, 20, 32 ));
+
+    let material = new THREE.MeshDepthMaterial();
+    material.side = THREE.DoubleSide;
+
+    let mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    //
+
+    renderer = new THREE.WebGLRenderer( { antialias: false, canvas: map3dCanvas } );
+    renderer.setSize(settings.mapDimension, settings.mapDimension);
+    renderer.setAnimationLoop( animation );
+    
+    function animation( time ) {
+
+      mesh.rotation.z = time / 2000;
+      mesh.rotation.x = time / 2000;
+      //mesh.rotation.y = time / 2000;
+
+      renderer.render( scene, camera );
+
+    }
+
+  }*/
+
 }

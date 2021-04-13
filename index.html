@@ -29,8 +29,8 @@
     <script src='js/general-utils.js'></script>
     <!--<script src='js/map-gen/loading-gen.js'></script>-->
     <script src='js/map-gen/utils.js'></script>
-    <script src='js/settings.js'></script>
-    <script async type="module" src='js/map-gen/main.js'></script>
+    <script type="module" src='js/settings.js'></script>
+    <script type="module" src='js/map-gen/main.js'></script>
 
   </head>
   <body class="pos-relative">
@@ -95,6 +95,36 @@
       </div>
       <div id="settings-panel-contents" class="is-hidden is-size-7">
         <hr class="my-1">
+        <div class="setting-container is-select is-2">
+          <span class="is-bold">View Type</span>
+          <div class="is-flex is-pulled-right">
+            <div class="select is-small is-info">
+              <select id="setting-displayType">
+                <option value="STANDARD">2D-Standard</option>
+                <option value="SHADOWS">2D-Shadows</option>
+                <!--<option value="3D">3D</option>-->
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="setting-container is-select">
+          <span class="is-bold">Map View</span>
+          <div class="is-flex is-pulled-right">
+            <div class="select is-small is-info">
+              <select id="setting-mapType">
+                <option value="1">Colored Height</option>
+                <option value="2">B&W Height</option>
+                <option value="3">Biomes</option>
+                <option value="4">Near Ocean</option>
+                <option value="5">Near Mountain</option>
+                <option value="6">Mountain Moisture</option>
+                <option value="7">Mountain Data</option>
+                <option value="10">Plasma Height</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <hr class="is-light my-1 mx-2">
         <div class="setting-container">
           <span class="is-bold">Map Size</span>
           <div class="is-flex is-pulled-right">
@@ -109,6 +139,44 @@
             <input id="setting-unitSize" class="ml-2" type="range" min="0" max="4" value="" step="1"/>
           </div>
         </div>
+        <hr class="is-light my-1 mx-2">
+        <div class="setting-container">
+          <span class="is-bold">Roughness</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-roughness"></div>
+            <input id="setting-roughness" class="ml-2" type="range" min="0" max="15" value="" step="1"/>
+          </div>
+        </div>
+        <div class="setting-container">
+          <span class="is-bold">Smoothness</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-smoothness"></div>
+            <input id="setting-smoothness" class="ml-2" type="range" min="0.1" max="0.9" value="" step="0.1"/>
+          </div>
+        </div>
+        <div class="setting-container">
+          <span class="is-bold">Smooth Iterations</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-smoothIterations"></div>
+            <input id="setting-smoothIterations" class="ml-2" type="range" min="1" max="5" value="" step="1"/>
+          </div>
+        </div>
+        <hr class="is-light my-1 mx-2">
+        <div class="setting-container">
+          <span class="is-bold">Moisture</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-moistureGlobal"></div>
+            <input id="setting-moistureGlobal" class="ml-2" type="range" min="-0.5" max="0.5" value="" step="0.1"/>
+          </div>
+        </div>
+        <div class="setting-container">
+          <span class="is-bold">Temperature</span>
+          <div class="is-flex is-pulled-right">
+            <div id="settingOutput-temperatureGlobal"></div>
+            <input id="setting-temperatureGlobal" class="ml-2" type="range" min="-0.5" max="0.5" value="" step="0.1"/>
+          </div>
+        </div>
+        <hr class="is-light my-1 mx-2">
         <div class="setting-container">
           <span class="is-bold">Ocean Height</span>
           <div class="is-flex is-pulled-right">
@@ -134,19 +202,6 @@
                 <option value="NORTH-TO-SOUTH">North-to-South</option>
                 <option value="SOUTH-TO-NORTH">South-to-North</option>
                 <option value="NONE">None</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <hr class="is-light my-1 mx-2">
-        <div class="setting-container is-select">
-          <span class="is-bold">Display Type</span>
-          <div class="is-flex is-pulled-right">
-            <div class="select is-small is-info">
-              <select id="setting-displayType">
-                <option value="STANDARD">2D-Standard</option>
-                <option value="SHADOWS">2D-Shadows</option>
-                <!--<option value="3D">3D</option>-->
               </select>
             </div>
           </div>

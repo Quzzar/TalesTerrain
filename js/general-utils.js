@@ -46,7 +46,7 @@ function hashCode(str) {
     (((prevHash << 5) - prevHash) + currVal.charCodeAt(0))|0, 0);
 }
 
-function signNumber(number) {
+function signNum(number) {
   return number < 0 ? `${number}` : `+${number}`;
 }
 

@@ -13,14 +13,11 @@ hr.is-light {
   background-color: #cecece;
 }
 
-#settings-panel {
-
-
-
-}
-
 .setting-container.is-select {
   padding-bottom: 0.8rem;
+}
+.setting-container.is-select.is-2 {
+  padding-bottom: 0.9rem;
 }
 
 #loading-spinner-container {
@@ -38,7 +35,8 @@ hr.is-light {
 
   background-color: rgb(247 247 247);
   border-radius: 15px;
-  width: 30vw;
+  width: 40vw;
+  max-width: 300px;
   min-width: 200px;
   padding-top: 0.1rem;
   padding-bottom: 0.1rem;
@@ -51,4 +49,6 @@ hr.is-light {
   -moz-box-shadow:    1px 2px 3px 1px #000;
   -webkit-box-shadow: 1px 2px 3px 1px #000;
   box-shadow:         1px 2px 3px 1px #000;
+  width: 68vh;
+  height: 68vh;
 }

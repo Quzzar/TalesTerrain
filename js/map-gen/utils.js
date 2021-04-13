@@ -2,40 +2,74 @@
 // Round to nearest pixel
 function round(n) {
     if (n-(parseInt(n, 10)) >= 0.5){
-        return parseInt(n, 10) + 1;
+      return parseInt(n, 10) + 1;
     }else{
-        return parseInt(n, 10);
+      return parseInt(n, 10);
     }
 }
 
-// smooth function
 function smooth(data, size, amt) {
+  amt = 1.0 - amt;
+
+  /* Rows, left to right */
+  for (var x = 1; x < size; x++){
+      for (var z = 0; z < size; z++){
+          data[x][z] = data[x - 1][z] * (1 - amt) + data[x][z] * amt;
+      }
+  }
+
+  /* Rows, right to left*/
+  for (x = size - 2; x < -1; x--){
+      for (z = 0; z < size; z++){
+          data[x][z] = data[x + 1][z] * (1 - amt) + data[x][z] * amt;
+      }
+  }
+
+  /* Columns, bottom to top */
+  for (x = 0; x < size; x++){
+      for (z = 1; z < size; z++){
+          data[x][z] = data[x][z - 1] * (1 - amt) + data[x][z] * amt;
+      }
+  }
+
+  /* Columns, top to bottom */
+  for (x = 0; x < size; x++){
+      for (z = size; z < -1; z--){
+          data[x][z] = data[x][z + 1] * (1 - amt) + data[x][z] * amt;
+      }
+  }
+
+  return data;
+}
+
+function smoothSub(data, dName, size, unitSize, amt) {
+  amt = 1.0 - amt;
 
     /* Rows, left to right */
-    for (var x = 1; x < size; x++){
-        for (var z = 0; z < size; z++){
-            data[x][z] = data[x - 1][z] * (1 - amt) + data[x][z] * amt;
+    for (var x = unitSize; x < size; x+=unitSize){
+        for (var z = 0; z < size; z+=unitSize){
+            (data[x][z])[dName] = (data[x - unitSize][z])[dName] * (1 - amt) + (data[x][z])[dName] * amt;
         }
     }
 
     /* Rows, right to left*/
-    for (x = size - 2; x < -1; x--){
-        for (z = 0; z < size; z++){
-            data[x][z] = data[x + 1][z] * (1 - amt) + data[x][z] * amt;
+    for (x = size - 2*unitSize; x < -1*unitSize; x-=unitSize){
+        for (z = 0; z < size; z+=unitSize){
+            (data[x][z])[dName] = (data[x + unitSize][z])[dName] * (1 - amt) + (data[x][z])[dName] * amt;
         }
     }
 
     /* Columns, bottom to top */
-    for (x = 0; x < size; x++){
-        for (z = 1; z < size; z++){
-            data[x][z] = data[x][z - 1] * (1 - amt) + data[x][z] * amt;
+    for (x = 0; x < size; x+=unitSize){
+        for (z = unitSize; z < size; z+=unitSize){
+            (data[x][z])[dName] = (data[x][z - unitSize])[dName] * (1 - amt) + (data[x][z])[dName] * amt;
         }
     }
 
     /* Columns, top to bottom */
-    for (x = 0; x < size; x++){
-        for (z = size; z < -1; z--){
-            data[x][z] = data[x][z + 1] * (1 - amt) + data[x][z] * amt;
+    for (x = 0; x < size; x+=unitSize){
+        for (z = size; z < -1*unitSize; z-=unitSize){
+            (data[x][z])[dName] = (data[x][z + unitSize])[dName] * (1 - amt) + (data[x][z])[dName] * amt;
         }
     }
 
@@ -60,7 +94,7 @@ function fade(startColor, endColor, steps, step){
 
 function generateNearbyOcean(mapData, settings){
   let size = settings.mapDimension;
-  let amt = settings.oceanMoistureSpread;
+  let amt = 1.0 - settings.oceanMoistureSpread;
 
   for(let x = 0; x < size; x+=settings.unitSize){
     for(let y = 0; y < size; y+=settings.unitSize){
@@ -101,7 +135,7 @@ function generateNearbyOcean(mapData, settings){
 
 function generateNearbyMountain(mapData, settings){
   let size = settings.mapDimension;
-  let amt = settings.mountainMoistureSpread;
+  let amt = 1.0 - settings.mountainSpread;
 
   for(let x = 0; x < size; x+=settings.unitSize){
     for(let y = 0; y < size; y+=settings.unitSize){
@@ -182,6 +216,8 @@ function generateMountainMoisture(mapData, settings) {
     }
   }
 
+  smoothSub(mapData, 'mountainMoisture', settings.mapDimension, settings.unitSize, settings.mountainMoistureSpread);
+
 }
 
 
@@ -241,7 +277,7 @@ function getBiome(mapData, point){
     return 'DESERT';
   }
 
-  return 'NONE';
+  return 'CRAG';
 
 }
 
@@ -269,6 +305,8 @@ function getBiomeColor(biome){
     colorFill = {r:195, g:196, b:194};
   } else if (biome == 'MOUNTAIN') {
     colorFill = {r:71, g:51, b:28};
+  } else if (biome == 'CRAG') {
+    colorFill = {r:57, g:57, b:57};
   } else {
     colorFill = {r:221, g:37, b:175};
   }
@@ -276,6 +314,6 @@ function getBiomeColor(biome){
 }
 
 function getBiomeList(){
-  return ['DESERT','FOREST','MOUNTAIN','PLAINS','RAINFOREST','SAVANNA','SEASONAL-FOREST','SHRUBLAND',
+  return ['CRAG','DESERT','FOREST','MOUNTAIN','PLAINS','RAINFOREST','SAVANNA','SEASONAL-FOREST','SHRUBLAND',
           'SWAMP','TAIGA','TUNDRA'];
 }

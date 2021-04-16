@@ -23,7 +23,7 @@ export default {
       return Math.floor(mapHeight*10)+1;
     }
 
-    const fillGround = false;
+    const fillGround = true;
     const tileHeight = TalespireSlabs.GetAsset(dirt_guid)['height'];
 
     const oceanHeight = convertToTileHeight(settings.oceanHeight);

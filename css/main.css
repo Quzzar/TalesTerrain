@@ -35,6 +35,11 @@ hr.is-light {
   padding: 3rem;
 }
 
+.output-textarea {
+  width: 20vw;
+  max-width: 200px;
+}
+
 .panel {
 
   background-color: rgb(247 247 247);

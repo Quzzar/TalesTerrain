@@ -14,7 +14,7 @@ export default {
       $('#complete-modal').addClass('is-active');
     });
 
-    // Modal Buttons
+    // Complete Modal Buttons
     $('#complete-modal-background, #complete-modal-close-btn').on("click", function(){
       $('#complete-modal').removeClass('is-active');
     });
@@ -23,6 +23,12 @@ export default {
     $('#modalSetting-mapToTileHeight').on('input',() => {
       let val = $('#modalSetting-mapToTileHeight').val();
       $('#modalSettingOutput-mapToTileHeight').text(val);
+    });
+
+
+    // Output Modal Buttons
+    $('#output-modal-background, #output-modal-close-btn').on("click", function(){
+      $('#output-modal').removeClass('is-active');
     });
 
   },
@@ -58,10 +64,10 @@ function buildSlabParts(numSplits, mapData, settings) {
 
       let sizeInBytes = new Blob([encodedText]).size;
       if(sizeInBytes <= MAX_SIZE_BYTES) {
-        console.log('Okay size: '+sizeInBytes);
+        console.log(`Okay size: ${sizeInBytes} bytes`);
         encodedTextArray.push(encodedText);
       } else {
-        console.log('Too large! '+sizeInBytes);
+        console.log(`Too large! ${sizeInBytes} bytes`);
         return null;
       }
 
@@ -96,14 +102,38 @@ function buildBtn(mapData, settings) {
     if(encodedTextArray == null){
       console.error('Failed to build and convert to slab!');
     } else {
-      $('#complete-modal-text-output').html('');
+      $('#output-modal-text-output').html('');
+      console.log(`Complete! ${encodedTextArray.length} slabs created.`);
 
       for(let i = 0; i < encodedTextArray.length; i++){
         let encodedText = encodedTextArray[i];
-        $('#complete-modal-text-output').append(`
-          <textarea id="complete-modal-text-output-${i}" class="textarea">${encodedText}</textarea>
+
+        $('#output-modal-text-output').append(`
+          <div class="py-1 px-3">
+            <button id="output-modal-copy-text-${i}" class="button is-success is-outlined">
+              <span>#${i+1} - Copy</span>
+              <span class="icon"><i class="fas fa-copy"></i></span>
+            </button>
+            <textarea id="output-modal-text-output-${i}" class="textarea is-sr-only">${encodedText}</textarea>
+          </div>
         `);
+
+        $('#output-modal-copy-text-'+i).on("click", function(){
+          document.getElementById('output-modal-text-output-'+i).select();
+          document.execCommand('copy');
+          bulmaToast.toast({
+            message: `#${i+1} Copied to Clipboard`,
+            type: 'is-success',
+            duration: 1000,
+          })
+        });
+
       }
+
+      $('#output-modal-image').attr('src', mapCanvas.toDataURL());
+
+      
+      $('#output-modal').addClass('is-active');
 
     }
 

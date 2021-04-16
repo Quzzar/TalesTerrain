@@ -177,11 +177,11 @@ let endTime;
 
 let mapCanvas = document.getElementById("mapCanvas");
 let shadowCanvas = document.getElementById("shadowCanvas");
-let map3dCanvas = document.getElementById("map3dCanvas");
+//let map3dCanvas = document.getElementById("map3dCanvas");
 
 let mapCtx = mapCanvas.getContext("2d");
 let shadowCtx = shadowCanvas.getContext("2d");
-let map3dCtx = map3dCanvas.getContext('webgl') || map3dCanvas.getContext('experimental-webgl');
+//let map3dCtx = map3dCanvas.getContext('webgl') || map3dCanvas.getContext('experimental-webgl');
 
 let mapData;
 let heightMap = {

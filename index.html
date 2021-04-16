@@ -17,6 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/bulma-extension.css" type="text/css"/>
+    <script src="js/talespire/ext/bulma-toast.min.js"></script>
 
     <link rel="stylesheet" href="css/main.css" type="text/css"/>
     <link rel="stylesheet" href="css/background.css" type="text/css"/>
@@ -268,17 +269,6 @@
         </header>
         <section class="modal-card-body">
 
-          <div id="complete-modal-text-output">
-            <!-- Output Text Areas Generate Here -->
-          </div>
-
-        </section>
-        <footer class="modal-card-foot">
-          
-          <button id="complete-modal-convert-btn" class="button is-info is-outlined">
-            <span>Convert</span>
-            <span class="icon"><i class="fas fa-cogs"></i></span>
-          </button>
           <label class="checkbox p-2">
             <input id="modalSetting-fillGround" type="checkbox" checked>
             Fill Ground
@@ -291,10 +281,43 @@
             </div>
           </div>
 
+        </section>
+        <footer class="modal-card-foot">
+          
+          <button id="complete-modal-convert-btn" class="button is-info is-outlined">
+            <span>Convert</span>
+            <span class="icon"><i class="fas fa-cogs"></i></span>
+          </button>
+
         </footer>
       </div>
     </div>
 
+    <!-- Output Modal -->
+    <div id="output-modal" class="modal">
+      <div id="output-modal-background" class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">
+            Complete!
+          </p>
+          <button id="output-modal-close-btn" class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+
+          <div id="output-modal-text-output">
+            <!-- Output Text Areas Generate Here -->
+          </div>
+
+        </section>
+        <footer class="modal-card-foot">
+          <img id="output-modal-image" style="width: 200px; height: 200px;"></img>
+        </footer>
+      </div>
+    </div>
+
+
+    <!-- Hidden Canvas for Importing Heightmaps -->
     <div class="is-hidden">
       <canvas id="heightmap-upload-canvas"></canvas>
       <img id="heightmap-upload-image"></img>

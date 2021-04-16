@@ -8,6 +8,7 @@ export default {
 
     // Complete Button
     $('#complete-map-btn').on("click", function(){
+      $('#test-output').text('');
       $('#complete-modal').addClass('is-active');
     });
 
@@ -19,11 +20,11 @@ export default {
   },
   buildBtn: (mapData, settings) => {
 
-    $('#data-test-btn').off();
-    $('#data-test-btn').on("click", function(){
+    $('#complete-modal-convert-btn').off();
+    $('#complete-modal-convert-btn').on("click", function(){
       //let assets = TalespireSlabs.GetAllAssets();
       //let grassAsset = TalespireSlabs.GetAsset(nguid)
-      
+
       let slab = [];
 
       var floorData = GenBuilder.BuildMap(mapData, settings);
@@ -34,7 +35,8 @@ export default {
       });
 
       let custom_results = TalespireSlabs.CreateSlab(slab);
-      console.log(custom_results);
+      //console.log(custom_results);
+      $('#test-output').text(custom_results);
 
     });
 

@@ -32,6 +32,10 @@
     <script type="module" src='js/settings.js'></script>
     <script type="module" src='js/map-gen/main.js'></script>
 
+    <!-- Local TaleSpire asset data -->    
+    <script src="js/talespire/ext/assetdata.js"></script>
+    <script src="js/talespire/ext/talespireslabs.js"></script>
+
   </head>
   <body class="pos-relative">
 
@@ -116,7 +120,7 @@
           <span class="icon is-pulled-right"><i id="settings-panel-chevron" class="fas fa-chevron-down"></i></span>
         </p>
       </div>
-      <div id="settings-panel-contents" class="is-hidden is-size-7">
+      <div id="settings-panel-contents" class="is-hidden is-size-7 pb-1">
         <hr class="my-1">
         
         <div class="setting-container is-select is-2">
@@ -216,19 +220,6 @@
           </div>
         </div>
         <hr class="is-light my-1 mx-2">
-        <div class="settings-panel-sub-section">
-          <div class="settings-panel-sub-bar is-clickable is-unselectable">
-            <p class="has-text-centered is-size-7">
-              Biomes Adv. Settings
-              <span class="icon is-small is-pulled-right mr-4"><i class="settings-panel-sub-chevron fas fa-chevron-down"></i></span>
-            </p>
-          </div>
-          <div class="settings-panel-sub-contents is-hidden is-size-7 px-2">
-            <hr class="is-light my-1 mx-2">
-            <div id="setting-biome-remap-container" class="ml-4"></div>
-          </div>
-        </div>
-        <hr class="is-light my-1 mx-2">
         <div class="setting-container is-select">
           <span class="is-bold">Wind Direction</span>
           <div class="is-flex is-pulled-right">
@@ -243,6 +234,20 @@
             </div>
           </div>
         </div>
+        <hr class="is-light my-1 mx-2">
+        <div class="settings-panel-sub-section">
+          <div class="settings-panel-sub-bar is-clickable is-unselectable">
+            <p class="has-text-centered is-size-7">
+              Biomes Adv. Settings
+              <span class="icon is-small is-pulled-right mr-4"><i class="settings-panel-sub-chevron fas fa-chevron-down"></i></span>
+            </p>
+          </div>
+          <div class="settings-panel-sub-contents is-hidden is-size-7 px-2">
+            <hr class="is-light my-1 mx-2">
+            <div id="setting-biome-remap-container" class="ml-4"></div>
+          </div>
+        </div>
+        <hr class="is-light my-1 mx-2">
 
       </div>
     </div>
@@ -263,7 +268,9 @@
         </header>
         <section class="modal-card-body">
           <!-- Content ... -->
-          <span>Here</span>
+          
+          <button id="data-test-btn" class="button">Generate</button>
+
         </section>
         <footer class="modal-card-foot">
           <button id="complete-modal-convert-btn" class="button is-info is-outlined">

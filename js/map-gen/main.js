@@ -123,10 +123,10 @@ window.onload = () => {
 }
 
 let settings = {
-    mapDimension : 512,
+    mapDimension : 16, // 512
     unitSize : 1,
-    mapType : 3,
-    displayType : 'SHADOWS', // STANDARD, SHADOWS, 3D
+    mapType : 1, // 3
+    displayType : 'STANDARD', // STANDARD, SHADOWS, 3D
 
     roughness : 5,
     smoothness : 0.4,
@@ -195,18 +195,26 @@ let heightMap = {
 function terrainGeneration(){
   "use strict";
 
-  mapCanvas.width = mapCanvas.height = settings.mapDimension;
-  shadowCanvas.width = shadowCanvas.height = settings.mapDimension;
-
   //setLoadPercentage(10, 'Generating heightmap...');
   startTime = new Date().getTime();
 
   if(!heightMap.isCustom){
     heightMap.data = new HeightMap(settings.mapDimension, settings.unitSize, settings.roughness).heightMapData;
+  } else {
+    settings.mapDimension = heightMap.data.length-1;
+    $('#setting-mapDimension').val(Math.log2(settings.mapDimension));
+    $('#settingOutput-mapDimension').text(settings.mapDimension);
+
+    settings.unitSize = 1;
+    $('#setting-unitSize').val(Math.log2(settings.unitSize));
+    $('#settingOutput-unitSize').text(settings.unitSize);
   }
 
   endTime = new Date().getTime();
   console.log(`Creating heightmap took: ${endTime-startTime}`);
+
+  mapCanvas.width = mapCanvas.height = settings.mapDimension;
+  shadowCanvas.width = shadowCanvas.height = settings.mapDimension;
 
   //setLoadPercentage(15, 'Smoothing terrain...');
   startTime = new Date().getTime();
@@ -308,6 +316,9 @@ function terrainGeneration(){
   setTimeout(() => {
     window.scrollTo(0,0);
   },0);
+
+  // Build Btn
+  SpireHandler.buildBtn(mapData, settings);
 
 }
 

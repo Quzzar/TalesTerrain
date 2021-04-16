@@ -27,7 +27,10 @@ export default {
 
       let slab = [];
 
-      var floorData = GenBuilder.BuildMap(mapData, settings);
+
+      const fillGround = $('#checkbox-fill-ground').prop('checked');
+
+      var floorData = GenBuilder.BuildMap(mapData, settings, fillGround);
       let extraData = floorData[1];
       var floors = floorData[0];
       floors.forEach(function (floor) {

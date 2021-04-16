@@ -4,7 +4,7 @@ import Asset from './asset.js';
 
 export default {
 
-  BuildMap: (mapData, settings) => {
+  BuildMap: (mapData, settings, fillGround) => {
 
     const grass_guid = '01c3a210-94fb-449f-8c47-993eda3e7126';
     const dirt_guid = 'd52cfe32-67b6-4717-a2cf-e59a44822f17';
@@ -23,7 +23,6 @@ export default {
       return Math.floor(mapHeight*10)+1;
     }
 
-    const fillGround = true;
     const tileHeight = TalespireSlabs.GetAsset(dirt_guid)['height'];
 
     const oceanHeight = convertToTileHeight(settings.oceanHeight);

@@ -4,7 +4,7 @@ import Asset from './asset.js';
 
 export default {
 
-  BuildMap: (mapData, settings, fillGround) => {
+  BuildMap: (mapData, settings, fillGround, mapToTileHeightMod, startX, startY, chunkSize) => {
 
     const grass_guid = '01c3a210-94fb-449f-8c47-993eda3e7126';
     const dirt_guid = 'd52cfe32-67b6-4717-a2cf-e59a44822f17';
@@ -20,7 +20,7 @@ export default {
       });
     }
     let convertToTileHeight = (mapHeight) => {
-      return Math.floor(mapHeight*10)+1;
+      return Math.floor(mapHeight*mapToTileHeightMod)+1;
     }
 
     const tileHeight = TalespireSlabs.GetAsset(dirt_guid)['height'];
@@ -34,8 +34,8 @@ export default {
     output[grass_guid] = [];
     output[sand_guid] = [];
 
-    for(let x = 0; x < settings.mapDimension/settings.unitSize; x++){
-      for(let y = 0; y < settings.mapDimension/settings.unitSize; y++){
+    for(let x = startX; x < startX+chunkSize; x++){
+      for(let y = startY; y < startY+chunkSize; y++){
         let tileData = mapData[x*settings.unitSize][y*settings.unitSize];
         let height = convertToTileHeight(tileData.height);
         

@@ -8,7 +8,7 @@
 
     <link rel="shortcut icon" href="fav.ico">
 
-    <title>TalesTerrain v0.2</title>
+    <title>TalesTerrain v0.2.3</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.2/css/bulma.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -267,20 +267,30 @@
           <button id="complete-modal-close-btn" class="delete" aria-label="close"></button>
         </header>
         <section class="modal-card-body">
-          <!-- Content ... -->
-          
-          <textarea id="test-output" class="textarea" placeholder="Press convert"></textarea>
+
+          <div id="complete-modal-text-output">
+            <!-- Output Text Areas Generate Here -->
+          </div>
 
         </section>
         <footer class="modal-card-foot">
+          
           <button id="complete-modal-convert-btn" class="button is-info is-outlined">
             <span>Convert</span>
             <span class="icon"><i class="fas fa-cogs"></i></span>
           </button>
-          <label class="checkbox">
-            <input id="checkbox-fill-ground" type="checkbox" checked>
+          <label class="checkbox p-2">
+            <input id="modalSetting-fillGround" type="checkbox" checked>
             Fill Ground
           </label>
+          <div class="p-2">
+            <span class="">Map to Tile Height</span>
+            <div class="is-flex">
+              <div id="modalSettingOutput-mapToTileHeight">15</div>
+              <input id="modalSetting-mapToTileHeight" class="ml-2" type="range" min="1" max="100" value="15" step="1"/>
+            </div>
+          </div>
+
         </footer>
       </div>
     </div>

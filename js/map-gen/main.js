@@ -123,10 +123,10 @@ window.onload = () => {
 }
 
 let settings = {
-    mapDimension : 64, // 512
-    unitSize : 2,
-    mapType : 1, // 3
-    displayType : 'STANDARD', // STANDARD, SHADOWS, 3D
+    mapDimension : 128,
+    unitSize : 1,
+    mapType : 3,
+    displayType : 'SHADOWS', // STANDARD, SHADOWS, 3D
 
     roughness : 5,
     smoothness : 0.4,

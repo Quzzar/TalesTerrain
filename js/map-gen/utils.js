@@ -1,4 +1,18 @@
 
+// Rand Funcs
+function randChoice(...args) {
+  return args[Math.floor(Math.random() * args.length)];
+}
+
+function randRange(min, max){
+  return (Math.random()*(max-min))+min;
+}
+
+function randChance(percent){
+  return (percent/100) > Math.random();
+}
+
+
 // Round to nearest pixel
 function round(n) {
     if (n-(parseInt(n, 10)) >= 0.5){
@@ -223,14 +237,17 @@ function generateMountainMoisture(mapData, settings) {
 
 // Determines biomes
 function getBiome(mapData, point, settings){
+  return getBiomeFromTileData(mapData[point.x][point.y], settings);
+}
+
+function getBiomeFromTileData(tileData, settings){
 
   const MAX_VAL = 100.00;
   const MIN_VAL = -100.00;
 
-  const data = mapData[point.x][point.y];
-  const moisture = data.moisture;
-  const temperature = data.temperature;
-  const nearMountain = data.nearMountain;
+  const moisture = tileData.moisture;
+  const temperature = tileData.temperature;
+  const nearMountain = tileData.nearMountain;
 
   // Using mapped biome (if current is disabled)
   let biomeMapper = (biome) => {

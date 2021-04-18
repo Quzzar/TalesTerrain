@@ -158,7 +158,7 @@
           <span class="is-bold">Map Size</span>
           <div class="is-flex is-pulled-right">
             <div id="settingOutput-mapDimension"></div>
-            <input id="setting-mapDimension" class="ml-2" type="range" min="4" max="13" value="" step="1"/>
+            <input id="setting-mapDimension" class="ml-2" type="range" min="4" max="10" value="" step="1"/>
           </div>
         </div>
         <div class="setting-container">
@@ -270,14 +270,18 @@
         <section class="modal-card-body">
 
           <label class="checkbox p-2">
-            <input id="modalSetting-fillGround" type="checkbox" checked>
+            <input id="modalSetting-useBiomes" type="checkbox" checked>
+            Generate Biomes
+          </label>
+          <label class="checkbox p-2">
+            <input id="modalSetting-fillGround" type="checkbox">
             Fill Ground
           </label>
           <div class="p-2">
             <span class="">Map to Tile Height</span>
             <div class="is-flex">
+              <input id="modalSetting-mapToTileHeight" class="mr-2" type="range" min="1" max="100" value="15" step="1"/>
               <div id="modalSettingOutput-mapToTileHeight">15</div>
-              <input id="modalSetting-mapToTileHeight" class="ml-2" type="range" min="1" max="100" value="15" step="1"/>
             </div>
           </div>
 
@@ -312,6 +316,9 @@
         </section>
         <footer class="modal-card-foot">
           <img id="output-modal-image" style="width: 200px; height: 200px;"></img>
+          <div class="pos-absolute pos-t-10 pos-r-10">
+            <span class="is-size-7">Place slabs in the order of across then down.</span>
+          </div>
         </footer>
       </div>
     </div>

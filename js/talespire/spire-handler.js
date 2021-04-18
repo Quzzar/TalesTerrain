@@ -44,12 +44,12 @@ function buildSlabParts(numSplits, mapData, settings) {
   const mapToTileHeightMod = parseInt($('#modalSetting-mapToTileHeight').val());
 
   let encodedTextArray = [];
-  let mapChunkSize = (settings.mapDimension/settings.unitSize)/numSplits;
+  let mapChunkSize = Math.floor((settings.mapDimension/settings.unitSize)/numSplits);
 
   console.log(`Split Count: ${numSplits} - Chunk Size: ${mapChunkSize}`);
 
-  for(let s_x = 0; s_x < numSplits; s_x++){
-    for(let s_y = 0; s_y < numSplits; s_y++){
+  for(let s_y = 0; s_y < numSplits; s_y++){
+    for(let s_x = 0; s_x < numSplits; s_x++){
 
       let slabData = GenBuilder.BuildMap(mapData, settings, fillGround, mapToTileHeightMod,
                     s_x*mapChunkSize, s_y*mapChunkSize, mapChunkSize);
@@ -87,9 +87,8 @@ function buildBtn(mapData, settings) {
     //let grassAsset = TalespireSlabs.GetAsset(nguid);
 
     let encodedTextArray;
-    for(let i = 0; i < 6; i++){
+    for(let numSplits = 1; numSplits < 256; numSplits++){
 
-      let numSplits = Math.pow(2, i);
       encodedTextArray = buildSlabParts(numSplits, mapData, settings);
       if(encodedTextArray != null){
         break;
@@ -125,7 +124,8 @@ function buildBtn(mapData, settings) {
             message: `#${i+1} Copied to Clipboard`,
             type: 'is-success',
             duration: 1000,
-          })
+          });
+          $(this).focus();
         });
 
       }

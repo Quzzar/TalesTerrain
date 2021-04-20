@@ -130,8 +130,31 @@ function buildBtn(mapData, settings) {
 
       }
 
-      $('#output-modal-image').attr('src', mapCanvas.toDataURL());
+      let placementMapCanvas = document.getElementById("placement-overlay-canvas");
+      placementMapCanvas.width = placementMapCanvas.height = settings.mapDimension;
 
+      let placementMapCtx = placementMapCanvas.getContext('2d');
+
+      placementMapCtx.drawImage(mapCanvas, 0, 0);
+
+      if(encodedTextArray.length == 4) {
+        let overlayGrid = document.getElementById('img-grid-2x2');
+        placementMapCtx.drawImage(overlayGrid, 0, 0, settings.mapDimension, settings.mapDimension);
+      } else if(encodedTextArray.length == 9) {
+        let overlayGrid = document.getElementById('img-grid-3x3');
+        placementMapCtx.drawImage(overlayGrid, 0, 0, settings.mapDimension, settings.mapDimension);
+      } else if(encodedTextArray.length == 16) {
+        let overlayGrid = document.getElementById('img-grid-4x4');
+        placementMapCtx.drawImage(overlayGrid, 0, 0, settings.mapDimension, settings.mapDimension);
+      } else if(encodedTextArray.length == 25) {
+        let overlayGrid = document.getElementById('img-grid-5x5');
+        placementMapCtx.drawImage(overlayGrid, 0, 0, settings.mapDimension, settings.mapDimension);
+      } else if(encodedTextArray.length == 36) {
+        let overlayGrid = document.getElementById('img-grid-6x6');
+        placementMapCtx.drawImage(overlayGrid, 0, 0, settings.mapDimension, settings.mapDimension);
+      }
+
+      $('#output-modal-image').attr('src', placementMapCanvas.toDataURL());
       
       $('#output-modal').addClass('is-active');
 

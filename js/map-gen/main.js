@@ -291,6 +291,15 @@ function terrainGeneration(){
   endTime = new Date().getTime();
   console.log(`Moisture Map took: ${endTime-startTime}`);
 
+  //setLoadPercentage(50, 'Mapping incline...');
+
+  startTime = new Date().getTime();
+
+  inclineMap();
+
+  endTime = new Date().getTime();
+  console.log(`Incline Map took: ${endTime-startTime}`);
+
   //setLoadPercentage(70, 'Coloring map...');
   startTime = new Date().getTime();
 
@@ -348,6 +357,85 @@ function moistureMap() {
         mapData[x][y].moisture = settings.moistureGlobal + (mapData[x][y].nearOcean*settings.oceanMoistureModifier + mapData[x][y].mountainMoisture);
       }
     }
+
+}
+
+function inclineMap() {
+
+  // Incline - Range: Infinity to Zero. One = Same height
+  for(let x = 0; x < settings.mapDimension; x += settings.unitSize){
+    for(let y = 0; y < settings.mapDimension; y += settings.unitSize){
+      
+      let height = mapData[x][y].height;
+
+      let westHeight = height;
+      try {westHeight = mapData[x-settings.unitSize][y].height; } catch (err) {}
+      let eastHeight = height;
+      try {eastHeight = mapData[x+settings.unitSize][y].height; } catch (err) {}
+      let northHeight = height;
+      try {northHeight = mapData[x][y-settings.unitSize].height; } catch (err) {}
+      let southHeight = height;
+      try {southHeight = mapData[x][y+settings.unitSize].height; } catch (err) {}
+
+      let avgInclineHeight;
+      let direction;
+      if(westHeight < height && eastHeight < height && northHeight < height && southHeight < height) {
+        avgInclineHeight = (westHeight+eastHeight+northHeight+southHeight)/4;
+        direction = 'NONE';
+      } else if(westHeight > height && eastHeight > height && northHeight > height && southHeight > height){
+        avgInclineHeight = (westHeight+eastHeight+northHeight+southHeight)/4;
+        direction = 'ALL';
+      } else if(westHeight > height && eastHeight > height && northHeight > height){
+        avgInclineHeight = (westHeight+eastHeight+northHeight)/3;
+        direction = 'WNE';
+      } else if(westHeight > height && eastHeight > height && southHeight > height){
+        avgInclineHeight = (westHeight+eastHeight+southHeight)/3;
+        direction = 'WSE';
+      } else if(northHeight > height && eastHeight > height && southHeight > height){
+        avgInclineHeight = (northHeight+eastHeight+southHeight)/3;
+        direction = 'NES';
+      } else if(northHeight > height && westHeight > height && southHeight > height){
+        avgInclineHeight = (northHeight+westHeight+southHeight)/3;
+        direction = 'NWS';
+      } else if(northHeight > height && eastHeight > height){
+        avgInclineHeight = (northHeight+eastHeight)/2;
+        direction = 'NE';
+      } else if(northHeight > height && southHeight > height){
+        avgInclineHeight = (northHeight+southHeight)/2;
+        direction = 'NS';
+      } else if(northHeight > height && westHeight > height){
+        avgInclineHeight = (northHeight+westHeight)/2;
+        direction = 'NW';
+      } else if(eastHeight > height && westHeight > height){
+        avgInclineHeight = (eastHeight+westHeight)/2;
+        direction = 'EW';
+      } else if(southHeight > height && eastHeight > height){
+        avgInclineHeight = (southHeight+eastHeight)/2;
+        direction = 'SE';
+      } else if(southHeight > height && westHeight > height){
+        avgInclineHeight = (southHeight+westHeight)/2;
+        direction = 'SW';
+      } else if(northHeight > height){
+        avgInclineHeight = northHeight;
+        direction = 'N';
+      } else if(eastHeight > height){
+        avgInclineHeight = eastHeight;
+        direction = 'E';
+      } else if(southHeight > height){
+        avgInclineHeight = southHeight;
+        direction = 'S';
+      } else if(westHeight > height){
+        avgInclineHeight = westHeight;
+        direction = 'W';
+      }
+
+      mapData[x][y].incline = {
+        value: avgInclineHeight/height,
+        direction: direction
+      };
+
+    }
+  }
 
 }
 
@@ -736,7 +824,11 @@ function processHeightMap(fileName, strDataURI){
         let a = imgData.data[pData + 3];
 
         //console.log(`HERE: ${r} ${g} ${b} ${a}`)
-        mapData[x][y] = (0.2126 * r + 0.7152 * g + 0.0722 * b)/100;
+        if(r == g && g == b){ // Is Greyscale
+          mapData[x][y] = r/255;
+        } else {
+          mapData[x][y] = (0.299 * r + 0.587 * g + 0.114 * b)/100;
+        }
         //console.log(mapData[x][y]);
 
       }

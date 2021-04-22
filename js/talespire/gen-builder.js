@@ -312,6 +312,8 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
 
             } else if(randChance(30)) {
 
+              let x_rel = randRange(x,x+0.5); let y_rel = randRange(y,y+0.5);
+
               addTile(output[guidMap.get(randChoice('tree_jungle_top_1', 'tree_jungle_top_2', 'tree_jungle_top_3'))],
                       x_rel, y_rel, (height+1)*tileHeight);
 

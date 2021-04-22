@@ -205,23 +205,23 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
 
         if(biome == 'SWAMP'){
 
-          if(randChance(25)){
+          if((height >= oceanHeight - 3*tileHeight) && randChance(25)){
             addTile(output[guidMap.get(randChoice('plant_lily_flower', 'plant_lily_pad_1', 'plant_lily_pad_2', 'plant_lily_pad_3'))],
                     randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
           }
-          if(randChance(25)){
+          if((height >= oceanHeight - 3*tileHeight) && randChance(25)){
             addTile(output[guidMap.get(randChoice('plant_reed_1', 'plant_reed_2'))],
                     randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
           }
-          if(randChance(20)){
+          if((height >= oceanHeight - 3*tileHeight) && randChance(20)){
             addTile(output[guidMap.get(randChoice('plant_reed_horsetail_1', 'plant_reed_horsetail_2', 'plant_reed_horsetail_3',
                     'plant_reed_horsetail_4', 'plant_reed_horsetail_5'))], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
           }
-          if(randChance(5)){
+          if((height >= oceanHeight - 3*tileHeight) && randChance(5)){
             addTile(output[guidMap.get(randChoice('tree_swamp_base_1', 'tree_swamp_base_2'))], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
           }
           /*
-          if(randChance(15)){
+          if(height >= oceanHeight && randChance(15)){
             const rotate = Math.floor(Math.random() * 3) * 4;
             const base_tileHeight = 2;
             const mid_tileHeight = 1;
@@ -309,6 +309,11 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
               }
               addTile(output[guidMap.get(randChoice('tree_jungle_top_1', 'tree_jungle_top_2', 'tree_jungle_top_3'))],
                       x_rel, y_rel, (height+1)*tileHeight + base_tileHeight+rel_height);
+
+            } else if(randChance(30)) {
+
+              addTile(output[guidMap.get(randChoice('tree_jungle_top_1', 'tree_jungle_top_2', 'tree_jungle_top_3'))],
+                      x_rel, y_rel, (height+1)*tileHeight);
 
             }
 
@@ -398,7 +403,7 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
             if(randChance(40)){
               addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
             }
-            if(randChance(2)){
+            if(randChance(1)){
               addTile(output[guidMap.get('log_moss')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
             }
 
@@ -437,7 +442,7 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
             if(randChance(25)){
               addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
             }
-            if(randChance(15)){
+            if(randChance(3)){
               addTile(output[guidMap.get('log_moss')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
             }
 

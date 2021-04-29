@@ -50,7 +50,20 @@ guidMap.set('tree_pine_stump', 'e5a66bdc-37cc-4317-b4c6-a1b88c3392e9');
 guidMap.set('tree_pine_top', '3f883945-6d03-4a4b-a1bb-511213c3b9da');
 guidMap.set('tree_pine_top_snow', '2d376ad1-ceb0-4014-b46f-20805d0dcf78');
 guidMap.set('tree_dead', 'ecac8c32-c044-4e97-8d8f-157a83968956');
+guidMap.set('tree_dead_2', 'afc09e2f-3673-4f91-b8b1-5b9df1537da6');
+guidMap.set('tree_dead_3', '431d6291-4b36-4c52-89da-db337a0c6073');
+guidMap.set('tree_dead_maple', '96cf5f92-9d99-47f1-a0e2-dc1da1c9be4a');
 guidMap.set('tree_dead_snow', '24f43e36-e8a4-4ea9-80b3-be32045eb75c');
+guidMap.set('tree_mushroom_base_1', '6a365371-2719-4c46-8179-26bbfad9f185');
+guidMap.set('tree_mushroom_base_2', '6ca1dec4-c997-4e59-9e97-3e9f68fa599c');
+guidMap.set('tree_mushroom_mid_1', '01dcdd32-35fe-4264-8c83-c827c84395c5');
+guidMap.set('tree_mushroom_mid_2', '628d670a-e6e2-4644-9b80-cf7ead664e10');
+guidMap.set('tree_mushroom_mid_3', '04ae06ee-8edd-43fe-8578-e57cfbfe5d7d');
+guidMap.set('tree_mushroom_mid_4', '32005ae8-70cc-4716-9ece-a856efab3949');
+guidMap.set('tree_mushroom_top_1', '7965bdf8-c83c-47a8-a737-b76db6d8f4f0');
+guidMap.set('tree_mushroom_top_2', '569c048d-b8b6-4d05-9bc6-fb1f9a905df2');
+guidMap.set('tree_mushroom_top_3', 'd37d2f53-2a58-4ff6-a5c4-44eae18c9984');
+guidMap.set('tree_mushroom_top_4', '32b49a2c-0d28-4bf6-82cc-f7133f0ff07e');
 guidMap.set('log_moss', '3ef32c7a-ddab-41c1-aac4-4b59abad193e');
 guidMap.set('tree_jungle_base_1', '6a7b1080-8aa4-4725-a2c7-8c3612f14d81');
 guidMap.set('tree_jungle_mid_1', 'f73916c8-23b7-4bc7-bd19-869bc701de01');
@@ -84,7 +97,8 @@ guidMap.set('plant_jungle_2', '9634779e-6d8f-4101-b552-af178d551b5f');
 guidMap.set('plant_pitcher_batch', '6c2a5846-5e94-4053-90a4-6273e3c4490e');
 guidMap.set('plant_pitcher', '40d23a3b-aad4-4725-ab94-4e71c37b2a32');
 guidMap.set('plant_flower_plumeria', 'c04bb850-c0fb-4621-9980-53cb3935f72f');
-//guidMap.set('plant_fern_1', '');
+guidMap.set('plant_mushroom_patch', '532caecc-08e9-49fb-8984-2d6929f46cc3');
+// guidMap.set('', );
 
 guidMap.set('ocean_barnacles_1', 'f6e51d9f-ae54-48ba-b128-60a01ddb3fad');
 guidMap.set('ocean_barnacles_2', 'a799ee0a-a40b-42e9-92ee-b7a5301a57d2');
@@ -93,6 +107,17 @@ guidMap.set('ocean_shell_set', '39c41cb8-bf5a-4b7b-8268-09de48bcef92');
 guidMap.set('ocean_shell_clam', 'ecb4cd7d-f59f-4763-b930-64922a77ad82');
 guidMap.set('ocean_starfish', '5bb65bb9-a8c0-41da-8ca4-dcbd2292127e');
 
+guidMap.set('rock_boulder_large', '451e9727-bc73-462c-8c46-512687e6e170');
+guidMap.set('rock_boulder_large_snow', '7c29ce52-5f82-4889-9579-3d6bd6c280a5');
+guidMap.set('rock_small', '923bc5e3-a845-403f-93dd-035dbd276279');
+guidMap.set('rock_cliff_snowy_type', 'a6e6fe14-4f68-4a2b-8425-e3d85d044418');
+guidMap.set('rock_cliff', 'a79a9a45-3bf2-4775-98c8-559ca5211532');
+guidMap.set('rock_cliff_snow', 'af71f233-e462-4ba2-99ed-99dada3c7032');
+guidMap.set('rock_cliff_desert_1', 'f2a57416-c1ea-47af-9ce2-a6161a23365d');
+guidMap.set('rock_cliff_desert_2', 'adf63b33-bf80-4176-8d6d-07dcee579684');
+guidMap.set('rock_cliff_desert_3', 'f4e9d129-c175-4efb-9462-662793171443');
+guidMap.set('rock_cliff_desert_4', 'cdfc2068-f4e6-42a0-9672-cd99ff162509');
+guidMap.set('rock_cliff_desert_pile', '31a706bc-f39a-427b-b66d-80f7d52e80e2');
 
 function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, startY, chunkSize) {
 
@@ -122,6 +147,7 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
   let extraData = {};
   for(const [name, guid] of guidMap.entries()){ output[guid] = []; }
 
+  let lowestHeight = 999999; let lowestX = null; let lowestY = null; let lowestMinI = null;
   for(let x = startX; x < startX+chunkSize; x++){
     for(let y = startY; y < startY+chunkSize; y++){
       let tileData = mapData[x*settings.unitSize][y*settings.unitSize];
@@ -140,9 +166,17 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
         let southHeight = height;
         try {southHeight = convertToTileHeight(getTileData(x, y+1).height); } catch (err) {}
 
-        let minHeight = Math.min(westHeight, eastHeight, northHeight, southHeight);
+        let minHeight = Math.min(westHeight, eastHeight, northHeight, southHeight, height);
         minI = minHeight;
 
+      }
+
+      // Find if lowest height so far,
+      if(lowestHeight > height) {
+        lowestHeight = height;
+        lowestX = x;
+        lowestY = y;
+        lowestMinI = minI;
       }
 
       // Set Ground Tiles
@@ -167,21 +201,33 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
 
       }
 
-      // Set pillar to fix TaleSpire lowering terrain
-      if(!fillGround){
-        if(x == startX && y == startY) {
-          for (let i = 0; i < minI; i++) {
-            addTile(output[guidMap.get('dirt')], x, y, i * tileHeight);
-          }
-        }
-      }
-
 
       // Set Surface Assets
       if(useBiomes) {
 
         let biome = getBiomeFromTileData(tileData, settings);
         
+        if(biome == 'CRAG'){
+
+          if(height >= oceanHeight){
+            if(randChance(10)){
+              if(randChance(40)){
+                addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(40)){
+                addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(40)){
+                addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(40)){
+                addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+            }
+          }
+
+        }
+
         if(biome == 'SAVANNA'){
 
           if(tileData.assetData.tileGuid == guidMap.get('grass') && randChance(35)){
@@ -213,6 +259,10 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
             addTile(output[guidMap.get(randChoice('plant_reed_1', 'plant_reed_2'))],
                     randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
           }
+          if((height >= oceanHeight) && randChance(5)){
+            addTile(output[guidMap.get('plant_mushroom_patch')],
+                    randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+          }
           if((height >= oceanHeight - 3*tileHeight) && randChance(20)){
             addTile(output[guidMap.get(randChoice('plant_reed_horsetail_1', 'plant_reed_horsetail_2', 'plant_reed_horsetail_3',
                     'plant_reed_horsetail_4', 'plant_reed_horsetail_5'))], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
@@ -237,17 +287,25 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
 
         if(biome == 'DESERT'){
 
-          if(height >= oceanHeight && randChance(15)){
+          if(height >= oceanHeight && randChance(10)){
             addTile(output[guidMap.get(randChoice('plant_cactus_standing_1', 'plant_cactus_standing_2', 'plant_cactus_multiple'))],
                     randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
           }
-          if(height >= oceanHeight && randChance(20)){
+          if(height >= oceanHeight && randChance(3)){
             for (let i = 0; i < 3; i++) {
               if (randChance(35)){
                 addTile(output[guidMap.get(randChoice('plant_cactus_single_1', 'plant_cactus_single_2', 'plant_cactus_multiple'))],
                     randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
               }
             }
+          }
+          if(height >= oceanHeight && randChance(0.1)){
+            addTile(output[guidMap.get(randChoice('rock_cliff_desert_3', 'rock_cliff_desert_4'))],
+                    randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+          }
+          if(randChance(1)){
+            addTile(output[guidMap.get('rock_cliff_desert_pile')],
+                    randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
           }
 
         }
@@ -292,6 +350,9 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
             }
             if(randChance(15)){
               addTile(output[guidMap.get('plant_flower_plumeria')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+            }
+            if(randChance(5)){
+              addTile(output[guidMap.get('plant_mushroom_patch')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
             }
 
             if(randChance(40)){
@@ -345,6 +406,10 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
             if(randChance(30)){
               addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
             }
+
+            if(randChance(5)){
+              addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+            }
   
             if(randChance(5)){
               addTile(output[guidMap.get('log_moss')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
@@ -361,23 +426,23 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
             if(randChance(30)){
               addTile(output[guidMap.get('tree_forest')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
   
+              if(randChance(40)){
+                addTile(output[guidMap.get('plant_fern_1')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(40)){
+                addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+            } else if(randChance(30)){
+              addTile(output[guidMap.get('tree_dead_maple')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+  
               if(randChance(30)){
                 addTile(output[guidMap.get('plant_fern_1')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
               }
               if(randChance(30)){
                 addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
               }
-            } else if(randChance(30)){
-              addTile(output[guidMap.get('tree_dead')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
-  
               if(randChance(40)){
-                addTile(output[guidMap.get('plant_fern_1')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
-              }
-              if(randChance(40)){
-                addTile(output[guidMap.get('plant_fern_1')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
-              }
-              if(randChance(20)){
-                addTile(output[guidMap.get('plant_fern_1')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+                addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
               }
             }
   
@@ -445,7 +510,22 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
               addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
             }
             if(randChance(3)){
-              addTile(output[guidMap.get('log_moss')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              addTile(output[guidMap.get('rock_boulder_large_snow')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+            }
+
+            if(randChance(5)){
+              if(randChance(30)){
+                addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(30)){
+                addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(30)){
+                addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(10)){
+                addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
             }
 
             if(randChance(15)){
@@ -496,17 +576,21 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
 
           if(tileData.assetData.tileGuid == guidMap.get('snow')){
 
-            if(randChance(15)){
-              addTile(output[guidMap.get('plant_fern_1')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
-            }
-            if(randChance(15)){
-              addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
-            }
-            if(randChance(15)){
-              addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
-            }
-            if(randChance(5)){
+            if(randChance(3)){
               addTile(output[guidMap.get('tree_dead_snow')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              if(randChance(15)){
+                addTile(output[guidMap.get('plant_fern_1')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(15)){
+                addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+              if(randChance(15)){
+                addTile(output[guidMap.get('plant_fern_2')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
+              }
+            }
+
+            if(randChance(5)){
+              addTile(output[guidMap.get('rock_small')], randRange(x,x+0.5), randRange(y,y+0.5), (height+1)*tileHeight);
             }
 
           }
@@ -544,9 +628,32 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
           }
         }
 
+        // Cliffs
+        /*
+        if(height >= oceanHeight){
+          let tileIncline = mapToTileHeightMod*(tileData.incline.value-1.0);
+          //console.log(tileIncline);
+          if(tileIncline > 8){
+            addTile(output[guidMap.get('rock_boulder_large')], randRange(x+0.4,x+0.6), randRange(y+0.4,y+0.6), (height+1)*tileHeight, 1);
+            if(tileIncline > 14){
+              addTile(output[guidMap.get('rock_boulder_large')], randRange(x+0.4,x+0.6), randRange(y+0.4,y+0.6), (height+3)*tileHeight, 1);
+              if(tileIncline > 18){
+                addTile(output[guidMap.get('rock_boulder_large')], randRange(x+0.4,x+0.6), randRange(y+0.4,y+0.6), (height+5)*tileHeight, 1);
+              }
+            }
+          }
+        }*/
+
 
       }
 
+    }
+  }
+
+  // Set pillar to fix TaleSpire lowering terrain
+  if(!fillGround){
+    for (let i = 0; i < lowestMinI; i++) {
+      addTile(output[guidMap.get('dirt')], lowestX, lowestY, i * tileHeight);
     }
   }
 

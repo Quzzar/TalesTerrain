@@ -656,6 +656,7 @@ function BuildMap(mapData, settings, fillGround, mapToTileHeightMod, startX, sta
       addTile(output[guidMap.get('dirt')], lowestX, lowestY, i * tileHeight);
     }
   }
+  addTile(output[guidMap.get('ocean_starfish')], lowestX+0.5, lowestY+0.5, 0); //Fix bug, each slab needs an ocean_starfish
 
   let response = [];
   Object.entries(output).forEach(function(outputItem) {
